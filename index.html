@@ -10,7 +10,6 @@
 :root {
   --orange:      #F97316;
   --orange-lt:   #FB923C;
-  --orange-dk:   #C2410C;
   --orange-glow: rgba(249,115,22,.13);
   --bg:          #0C0C0E;
   --bg2:         #111113;
@@ -56,7 +55,7 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
 .ctrl-group select:focus,.ctrl-group input:focus{border-color:var(--orange);}
 .nav-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);width:32px;height:32px;border-radius:7px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
 .nav-btn:hover{background:var(--orange);border-color:var(--orange);color:#fff;}
-.period-label{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;min-width:160px;text-align:center;}
+.period-label{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;min-width:180px;text-align:center;}
 .today-btn{background:transparent;border:1px solid var(--orange);color:var(--orange);padding:0 12px;border-radius:7px;cursor:pointer;font-family:'Prompt',sans-serif;font-size:12px;height:32px;transition:all .15s;}
 .today-btn:hover{background:var(--orange);color:#fff;}
 
@@ -72,8 +71,9 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
 .leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
 .leg-dot{width:10px;height:10px;border-radius:3px;}
 
-/* ERROR */
+/* ERROR / INFO */
 .err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:12px 18px;color:var(--red);font-size:12px;margin:14px 20px;}
+.info-box{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:10px 18px;color:var(--blue);font-size:12px;margin:10px 20px;}
 
 /* GANTT */
 #gantt-wrap{overflow:auto;-webkit-overflow-scrolling:touch;}
@@ -83,7 +83,7 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
 .g-month-corner{position:sticky;left:0;z-index:31;background:var(--bg4);border-right:1px solid var(--border);border-bottom:1px solid var(--border);height:24px;}
 .g-month-cell{height:24px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--muted);background:var(--bg4);letter-spacing:.3px;text-transform:uppercase;white-space:nowrap;overflow:hidden;}
 
-/* date header row */
+/* date header */
 .g-corner{position:sticky;left:0;z-index:30;background:var(--bg3);border-right:1px solid var(--border);border-bottom:2px solid rgba(249,115,22,.3);padding:0 14px;height:46px;display:flex;align-items:center;font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
 .g-date-cell{height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid var(--border);border-bottom:2px solid rgba(249,115,22,.3);font-size:10px;color:var(--muted2);background:var(--bg3);user-select:none;}
 .g-date-cell.we{background:var(--bg4);}
@@ -92,44 +92,46 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
 .g-date-cell.tday .d-num{color:var(--orange);}
 .d-day{font-size:9px;color:var(--muted2);margin-top:1px;}
 
-/* person row */
+/* person rows */
 .g-name-cell{position:sticky;left:0;z-index:20;background:var(--bg2);border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:0 12px;height:42px;display:flex;align-items:center;gap:8px;white-space:nowrap;}
 .avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
 .g-name-text{font-size:12px;font-weight:500;color:var(--text);}
 .g-leave-count{font-size:10px;color:var(--muted);margin-left:auto;padding-right:2px;}
-
 .g-row-cell{height:42px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);position:relative;}
 .g-row-cell.we{background:var(--bg3);}
 .g-row-cell.tday{background:var(--orange-glow);}
 
 /* leave bar */
-.leave-bar{position:absolute;top:7px;bottom:7px;left:2px;border-radius:5px;display:flex;align-items:center;padding:0 6px;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;cursor:default;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.4);transition:filter .12s;}
+.leave-bar{position:absolute;top:7px;bottom:7px;left:2px;border-radius:5px;display:flex;align-items:center;padding:0 7px;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;cursor:default;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.4);transition:filter .12s;}
 .leave-bar:hover{filter:brightness(1.2);z-index:10;}
 
 /* workload row */
-.g-wl-name{position:sticky;left:0;z-index:20;background:var(--bg4);border-right:1px solid var(--border);border-top:2px solid var(--border);padding:0 14px;height:34px;display:flex;align-items:center;font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
-.g-wl-cell{height:34px;border-right:1px solid var(--border);border-top:2px solid var(--border);background:var(--bg4);position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px;}
+.g-wl-name{position:sticky;left:0;z-index:20;background:var(--bg4);border-right:1px solid var(--border);border-top:2px solid var(--border);padding:0 14px;height:36px;display:flex;align-items:center;font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.g-wl-cell{height:36px;border-right:1px solid var(--border);border-top:2px solid var(--border);background:var(--bg4);position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px;}
 .wl-bar{border-radius:3px 3px 0 0;width:calc(100% - 4px);display:flex;align-items:center;justify-content:center;}
 .wl-num{font-size:9px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);}
 
-/* TOOLTIP */
-#tooltip{position:fixed;z-index:500;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;pointer-events:none;opacity:0;transition:opacity .12s;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.6);max-width:230px;}
-#tooltip.show{opacity:1;}
-.tt-name{font-weight:600;color:var(--text);margin-bottom:4px;}
-.tt-row{color:var(--muted);font-size:11px;line-height:1.8;}
-.tt-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600;margin-top:5px;}
+/* empty row */
+.g-empty{grid-column:1/-1;padding:40px;text-align:center;color:var(--muted);font-size:13px;}
 
-/* MODAL */
+/* TOOLTIP */
+#tooltip{position:fixed;z-index:500;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;pointer-events:none;opacity:0;transition:opacity .12s;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.6);max-width:240px;}
+#tooltip.show{opacity:1;}
+.tt-name{font-weight:600;color:var(--text);margin-bottom:4px;font-size:13px;}
+.tt-row{color:var(--muted);font-size:11px;line-height:1.9;}
+.tt-badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:10px;font-weight:600;margin-top:5px;}
+
+/* CONFIG MODAL */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:300;align-items:center;justify-content:center;}
 .modal-bg.open{display:flex;}
-.modal{background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:24px;width:90%;max-width:450px;}
+.modal{background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:24px;width:90%;max-width:420px;}
 .modal h3{font-size:15px;font-weight:600;margin-bottom:16px;}
 .mrow{margin-bottom:12px;}
 .mrow label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;}
 .mrow input{width:100%;background:var(--bg4);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;font-family:'Prompt',sans-serif;font-size:12px;outline:none;}
 .mrow input:focus{border-color:var(--orange);}
 .hint{font-size:10px;color:var(--muted2);margin-top:3px;}
-.mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;}
+.mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
 .btn-p{background:var(--orange);color:#fff;border:none;padding:8px 20px;border-radius:7px;cursor:pointer;font-family:'Prompt',sans-serif;font-size:12px;font-weight:500;}
 .btn-s{background:var(--bg4);color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:7px;cursor:pointer;font-family:'Prompt',sans-serif;font-size:12px;}
 </style>
@@ -148,14 +150,16 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
 <header>
   <div style="display:flex;align-items:center;gap:12px">
     <span class="logo">ITD</span>
-    <div><div class="htitle">Leave Schedule</div><div class="hsub">Survey Department</div></div>
+    <div><div class="htitle">Leave Schedule</div><div class="hsub">Italian-Thai Development – Survey Department</div></div>
   </div>
   <div class="hright">
     <span id="lupd"></span>
-    <button class="icon-btn" id="cfg-btn" title="ตั้งค่า Sheet">⚙️</button>
+    <button class="icon-btn" id="cfg-btn" title="ตั้งค่า">⚙️</button>
     <button class="refresh-btn" id="ref-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
-      รีเฟรช
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M1 4v6h6M23 20v-6h-6"/>
+        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/>
+      </svg>รีเฟรช
     </button>
   </div>
 </header>
@@ -174,14 +178,11 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
     <label>มุมมอง</label>
     <select id="zoom-sel">
       <option value="30">รายเดือน (30 วัน)</option>
-      <option value="90">รายไตรมาส (90 วัน)</option>
+      <option value="60">2 เดือน</option>
+      <option value="90">3 เดือน</option>
       <option value="180">6 เดือน</option>
       <option value="365">รายปี</option>
     </select>
-  </div>
-  <div class="ctrl-group">
-    <label>ประเภทการลา</label>
-    <select id="type-sel"><option value="">ทั้งหมด</option></select>
   </div>
   <div class="ctrl-group" style="margin-left:auto">
     <label>ค้นหาพนักงาน</label>
@@ -192,23 +193,27 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
 <div class="summary-strip" id="sum-strip"></div>
 <div class="legend" id="legend"></div>
 <div id="err-area"></div>
-
 <div id="gantt-wrap"><div id="gantt"></div></div>
 
 <!-- CONFIG MODAL -->
 <div class="modal-bg" id="modal-bg">
   <div class="modal">
     <h3>⚙️ ตั้งค่า Google Sheet</h3>
-    <div class="mrow"><label>Spreadsheet ID</label><input id="c-id"/><p class="hint">จาก URL: …/spreadsheets/d/<b style="color:var(--orange)">ID</b>/edit</p></div>
-    <div class="mrow"><label>ชื่อ Tab (Sheet Name)</label><input id="c-tab" placeholder="เว้นว่างเพื่อใช้ Sheet แรก"/></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="mrow"><label>คอลัมน์ชื่อพนักงาน</label><input id="c-cn" maxlength="3"/></div>
-      <div class="mrow"><label>คอลัมน์วันที่เริ่มลา</label><input id="c-cs" maxlength="3"/></div>
-      <div class="mrow"><label>คอลัมน์วันที่สิ้นสุด</label><input id="c-ce" maxlength="3"/></div>
-      <div class="mrow"><label>คอลัมน์ประเภทการลา</label><input id="c-ct" maxlength="3"/></div>
-      <div class="mrow"><label>คอลัมน์สถานะ (ถ้ามี)</label><input id="c-cst" maxlength="3"/></div>
-      <div class="mrow"><label>Row เริ่มข้อมูล (header=1)</label><input id="c-dr" type="number" min="1"/></div>
+    <div class="mrow">
+      <label>Spreadsheet ID</label>
+      <input id="c-id"/>
+      <p class="hint">จาก URL: …/spreadsheets/d/<b style="color:var(--orange)">ID</b>/edit</p>
     </div>
+    <div class="mrow">
+      <label>ชื่อ Sheet ข้อมูล (period tab)</label>
+      <input id="c-tab" placeholder="period"/>
+      <p class="hint">ชื่อ tab ที่มีคอลัมน์ชื่อ, วันเริ่ม, วันสิ้นสุด</p>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6">
+      <b style="color:var(--text)">โครงสร้าง Sheet "period" ที่รองรับ:</b><br/>
+      คอลัมน์ A = No. | B = ชื่อพนักงาน | C = วันเริ่ม P1 | D = วันสิ้นสุด P1 | E = วันเริ่ม P2 | F = วันสิ้นสุด P2 | …<br/>
+      รูปแบบวันที่: <b>DD-MM-YYYY</b> หรือ <b>DD/MM/YYYY</b>
+    </p>
     <div class="mbtns">
       <button class="btn-s" id="m-cancel">ยกเลิก</button>
       <button class="btn-p" id="m-save">💾 บันทึกและโหลด</button>
@@ -218,290 +223,405 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
 
 <script>
 // ── CONFIG ─────────────────────────────────────────────
-const SK='itd_leave_cfg3';
-const DEF={sheetId:'1d8g6KbrMxCvBMOkxJpQaUxTJcVO6aLL_4eS1IahVTQc',sheetName:'',colName:'A',colStart:'B',colEnd:'C',colType:'D',colStatus:'E',dataRow:2};
-const loadCfg=()=>{try{return{...DEF,...JSON.parse(localStorage.getItem(SK)||'{}')};}catch{return{...DEF};}};
-const saveCfg=c=>localStorage.setItem(SK,JSON.stringify(c));
+const SK = 'itd_period_cfg';
+const DEF = {
+  sheetId: '1d8g6KbrMxCvBMOkxJpQaUxTJcVO6aLL_4eS1IahVTQc',
+  sheetName: 'period'
+};
+const loadCfg = () => { try { return { ...DEF, ...JSON.parse(localStorage.getItem(SK) || '{}') }; } catch { return { ...DEF }; } };
+const saveCfg = c => localStorage.setItem(SK, JSON.stringify(c));
 
 // ── DATE UTILS ─────────────────────────────────────────
-const d0=d=>{const x=new Date(d);x.setHours(0,0,0,0);return x;};
-const addDays=(d,n)=>new Date(d.getTime()+n*864e5);
-const fmtTH=d=>d?d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'}):'—';
-const fmtShort=d=>d?d.toLocaleDateString('th-TH',{day:'2-digit',month:'short'}):'—';
-const DAY_TH=['อา','จ','อ','พ','พฤ','ศ','ส'];
-const MON_TH=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const d0 = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+const addDays = (d, n) => new Date(d.getTime() + n * 864e5);
+const fmtTH = d => d ? d.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+const fmtShort = d => d ? d.toLocaleDateString('th-TH', { day: '2-digit', month: 'short' }) : '—';
+const DAY_TH = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+const MON_TH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+const TODAY = d0(new Date());
 
-// ── COLORS ────────────────────────────────────────────
-const PAL=[
-  {fg:'#F97316',bg:'rgba(249,115,22,.25)'},
-  {fg:'#3B82F6',bg:'rgba(59,130,246,.25)'},
-  {fg:'#22C55E',bg:'rgba(34,197,94,.25)'},
-  {fg:'#A855F7',bg:'rgba(168,85,247,.25)'},
-  {fg:'#EAB308',bg:'rgba(234,179,8,.25)'},
-  {fg:'#EC4899',bg:'rgba(236,72,153,.25)'},
-  {fg:'#14B8A6',bg:'rgba(20,184,166,.25)'},
-  {fg:'#F43F5E',bg:'rgba(244,63,94,.25)'},
+// Parse DD-MM-YYYY or DD/MM/YYYY or gviz Date(y,m,d)
+function parseDate(v) {
+  if (!v) return null;
+  const s = String(v).trim();
+  // gviz format
+  let m = s.match(/Date\((\d+),(\d+),(\d+)\)/);
+  if (m) return d0(new Date(+m[1], +m[2], +m[3]));
+  // DD-MM-YYYY or DD/MM/YYYY
+  m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
+  if (m) return d0(new Date(+m[3], +m[2] - 1, +m[1]));
+  // YYYY-MM-DD
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return d0(new Date(+m[1], +m[2] - 1, +m[3]));
+  // fallback
+  const fd = new Date(s);
+  return isNaN(fd) ? null : d0(fd);
+}
+
+function diffDays(s, e) {
+  return Math.max(1, Math.round((e - s) / 864e5) + 1);
+}
+
+// ── PALETTE ───────────────────────────────────────────
+// One color per period index (Period 1, 2, 3 …)
+const PERIOD_COLORS = [
+  { fg: '#F97316', bg: 'rgba(249,115,22,.25)'  },  // P1 orange
+  { fg: '#3B82F6', bg: 'rgba(59,130,246,.25)'  },  // P2 blue
+  { fg: '#22C55E', bg: 'rgba(34,197,94,.25)'   },  // P3 green
+  { fg: '#A855F7', bg: 'rgba(168,85,247,.25)'  },  // P4 purple
+  { fg: '#EAB308', bg: 'rgba(234,179,8,.25)'   },  // P5 yellow
+  { fg: '#EC4899', bg: 'rgba(236,72,153,.25)'  },  // P6 pink
+  { fg: '#14B8A6', bg: 'rgba(20,184,166,.25)'  },  // P7 teal
 ];
-const KNOWN={'ลาพักร้อน':PAL[0],'ลากิจ':PAL[1],'ลาป่วย':PAL[2],'ลาคลอด':PAL[3],'ลาบวช':PAL[4],'ลาอุปสมบท':PAL[4]};
-const tcmap={};let pi2=0;
-const typeClr=t=>{if(!t)return PAL[0];if(KNOWN[t])return KNOWN[t];if(!tcmap[t]){tcmap[t]=PAL[pi2%PAL.length];pi2++;}return tcmap[t];};
-const AVC=['#F97316','#3B82F6','#22C55E','#A855F7','#EAB308','#EC4899','#14B8A6','#F43F5E'];
+const AVC = ['#F97316','#3B82F6','#22C55E','#A855F7','#EAB308','#EC4899','#14B8A6','#F43F5E'];
 
 // ── FETCH ─────────────────────────────────────────────
-const colIdx=l=>{l=(l||'A').toUpperCase().trim();let n=0;for(let i=0;i<l.length;i++)n=n*26+l.charCodeAt(i)-64;return n-1;};
-
-async function fetchData(cfg){
-  const sp=cfg.sheetName?'&sheet='+encodeURIComponent(cfg.sheetName):'';
-  const url=`https://docs.google.com/spreadsheets/d/${cfg.sheetId}/gviz/tq?tqx=out:json${sp}`;
-  const res=await fetch(url);
-  if(!res.ok)throw new Error('HTTP '+res.status);
-  const txt=await res.text();
-  const json=JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
-  if(json.status==='error')throw new Error(json.errors?.[0]?.detailed_message||'Sheet error');
+async function fetchSheet(sheetId, sheetName) {
+  const sp = sheetName ? '&sheet=' + encodeURIComponent(sheetName) : '';
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json${sp}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const txt = await res.text();
+  const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+  if (json.status === 'error') throw new Error(json.errors?.[0]?.detailed_message || 'Sheet error');
   return json.table;
 }
 
-function parseTable(tbl,cfg){
-  const iN=colIdx(cfg.colName),iS=colIdx(cfg.colStart),iE=cfg.colEnd?colIdx(cfg.colEnd):null;
-  const iT=cfg.colType?colIdx(cfg.colType):null,iSt=cfg.colStatus?colIdx(cfg.colStatus):null;
-  const dr=(cfg.dataRow||2)-1;
-  const rows=[];
-  const parseD=v=>{
-    if(!v)return null;
-    if(typeof v==='string'){const m=v.match(/Date\((\d+),(\d+),(\d+)\)/);if(m)return d0(new Date(+m[1],+m[2],+m[3]));const x=new Date(v);if(!isNaN(x))return d0(x);}
-    return null;
-  };
-  const gv=(c,i)=>(i!==null&&i<c.length&&c[i]&&c[i].v!==null)?c[i].v:'';
-  const gf=(c,i)=>(i!==null&&i<c.length&&c[i])?(c[i].f||c[i].v||''):'';
-  (tbl.rows||[]).slice(dr).forEach(row=>{
-    const c=row.c||[];
-    const name=String(gv(c,iN)||'').trim();if(!name)return;
-    const sd=parseD(gv(c,iS));
-    const ed=iE?(parseD(gv(c,iE))||sd):sd;
-    const type=iT?String(gv(c,iT)||'').trim():'';
-    const status=iSt?String(gv(c,iSt)||'').trim():'';
-    const days=sd&&ed?Math.max(1,Math.round((ed-sd)/864e5)+1):1;
-    rows.push({name,startDate:sd,endDate:ed,type,status,days,
-      startFmt:sd?fmtTH(sd):(gf(c,iS)||String(gv(c,iS))),
-      endFmt:ed?fmtTH(ed):(iE?gf(c,iE)||String(gv(c,iE)):'')});
-  });
-  return rows;
+// ── PARSE "period" sheet ──────────────────────────────
+// Expected layout (row 1 = header, skip):
+// Col A: No.  | Col B: Employee Name
+// Col C: P1 Start | Col D: P1 End
+// Col E: P2 Start | Col F: P2 End
+// Col G: P3 Start | Col H: P3 End  … (pairs continue)
+//
+// Returns array of: { name, periods: [{start, end, days, label, periodIdx}] }
+function parsePeriodSheet(table) {
+  const rows = table.rows || [];
+  const result = [];   // { name, periods[] }
+  const allLeaves = []; // flat for Gantt
+
+  // skip row 0 (header)
+  for (let ri = 1; ri < rows.length; ri++) {
+    const cells = rows[ri].c || [];
+    const getv = i => (i < cells.length && cells[i] && cells[i].v !== null) ? cells[i].v : null;
+    const getf = i => (i < cells.length && cells[i]) ? (cells[i].f || cells[i].v || null) : null;
+
+    const name = String(getv(1) || '').trim();
+    if (!name) continue;
+
+    const periods = [];
+    // col index: C=2, D=3, E=4, F=5, G=6, H=7 …
+    // pair: startCol = 2 + periodIdx*2, endCol = 3 + periodIdx*2
+    let pIdx = 0;
+    while (true) {
+      const sc = 2 + pIdx * 2;
+      const ec = 3 + pIdx * 2;
+      if (sc >= cells.length && ec >= cells.length) break;
+
+      // try raw value first, then formatted (gviz may store date as string)
+      const sv = getv(sc) || getf(sc);
+      const ev = getv(ec) || getf(ec);
+
+      const sd = parseDate(sv);
+      const ed = parseDate(ev) || sd;
+
+      if (sd) {
+        const days = diffDays(sd, ed);
+        periods.push({
+          start: sd,
+          end: ed,
+          days,
+          label: `Period ${pIdx + 1}`,
+          periodIdx: pIdx,
+          startFmt: fmtTH(sd),
+          endFmt: fmtTH(ed),
+        });
+      }
+      pIdx++;
+      // stop after checking 10 period pairs
+      if (pIdx >= 10) break;
+    }
+
+    if (periods.length > 0) {
+      result.push({ name, periods });
+      periods.forEach(p => allLeaves.push({ name, ...p }));
+    }
+  }
+
+  return { persons: result, leaves: allLeaves };
 }
 
 // ── STATE ─────────────────────────────────────────────
-let allRows=[],filteredRows=[];
-let viewStart=d0(new Date()),viewDays=30;
-const TODAY=d0(new Date());
+let persons = [], allLeaves = [], filteredPersons = [], filteredLeaves = [];
+let viewStart = d0(new Date()), viewDays = 30;
 
-// ── GANTT ─────────────────────────────────────────────
-const NW=170, CW=28; // name width, col width (px)
+// ── GANTT ──────────────────────────────────────────────
+const NW = 180, CW = 30;
 
-function buildGantt(){
-  const vend=addDays(viewStart,viewDays-1);
-  const dates=[];
-  for(let d=new Date(viewStart);d<=vend;d=addDays(d,1))dates.push(new Date(d));
+function buildGantt() {
+  const vend = addDays(viewStart, viewDays - 1);
+  const dates = [];
+  for (let d = new Date(viewStart); d <= vend; d = addDays(d, 1)) dates.push(new Date(d));
 
-  // group by person preserving order
-  const pMap={};const pOrder=[];
-  filteredRows.forEach(r=>{if(!pMap[r.name]){pMap[r.name]=[];pOrder.push(r.name);}pMap[r.name].push(r);});
+  const gantt = document.getElementById('gantt');
+  gantt.style.gridTemplateColumns = `${NW}px repeat(${dates.length}, ${CW}px)`;
 
-  const gantt=document.getElementById('gantt');
-  gantt.style.gridTemplateColumns=`${NW}px repeat(${dates.length},${CW}px)`;
+  let h = '';
 
-  let h='';
-
-  // month row
-  h+=`<div class="g-month-corner"></div>`;
-  let mi=0;
-  while(mi<dates.length){
-    const m=dates[mi].getMonth(),y=dates[mi].getFullYear();
-    let cnt=0;while(mi+cnt<dates.length&&dates[mi+cnt].getMonth()===m)cnt++;
-    h+=`<div class="g-month-cell" style="grid-column:span ${cnt}">${MON_TH[m]} ${y+543}</div>`;
-    mi+=cnt;
+  // month merge row
+  h += `<div class="g-month-corner"></div>`;
+  let mi = 0;
+  while (mi < dates.length) {
+    const m = dates[mi].getMonth(), y = dates[mi].getFullYear();
+    let cnt = 0;
+    while (mi + cnt < dates.length && dates[mi + cnt].getMonth() === m) cnt++;
+    h += `<div class="g-month-cell" style="grid-column:span ${cnt}">${MON_TH[m]} ${y + 543}</div>`;
+    mi += cnt;
   }
 
   // date header
-  h+=`<div class="g-corner">พนักงาน / วันที่</div>`;
-  dates.forEach(d=>{
-    const we=d.getDay()===0||d.getDay()===6,isT=d.getTime()===TODAY.getTime();
-    h+=`<div class="g-date-cell${we?' we':''}${isT?' tday':''}"><span class="d-num">${d.getDate()}</span><span class="d-day">${DAY_TH[d.getDay()]}</span></div>`;
+  h += `<div class="g-corner">พนักงาน / วันที่</div>`;
+  dates.forEach(d => {
+    const we = d.getDay() === 0 || d.getDay() === 6;
+    const isT = d.getTime() === TODAY.getTime();
+    h += `<div class="g-date-cell${we ? ' we' : ''}${isT ? ' tday' : ''}">
+      <span class="d-num">${d.getDate()}</span>
+      <span class="d-day">${DAY_TH[d.getDay()]}</span>
+    </div>`;
   });
 
+  if (filteredPersons.length === 0) {
+    h += `<div class="g-empty">🔍 ไม่พบข้อมูลการลาในช่วงนี้</div>`;
+    gantt.innerHTML = h;
+    return;
+  }
+
   // person rows
-  pOrder.forEach((name,idx)=>{
-    const leaves=pMap[name];
-    const totalD=leaves.reduce((s,r)=>s+(r.days||1),0);
-    const initials=(name.split(' ').map(w=>w[0]||'').join('').slice(0,2)||name[0]||'?').toUpperCase();
-    const avClr=AVC[idx%AVC.length];
-    h+=`<div class="g-name-cell"><div class="avatar" style="background:${avClr}">${initials}</div><span class="g-name-text">${name}</span><span class="g-leave-count">${totalD}วัน</span></div>`;
-    dates.forEach(d=>{
-      const we=d.getDay()===0||d.getDay()===6,isT=d.getTime()===TODAY.getTime();
-      h+=`<div class="g-row-cell${we?' we':''}${isT?' tday':''}"></div>`;
+  filteredPersons.forEach((person, idx) => {
+    const totalDays = person.periods.reduce((s, p) => s + p.days, 0);
+    const initials = (person.name.split(' ').map(w => w[0] || '').join('').slice(0, 2) || person.name[0] || '?').toUpperCase();
+    const avClr = AVC[idx % AVC.length];
+
+    h += `<div class="g-name-cell">
+      <div class="avatar" style="background:${avClr}">${initials}</div>
+      <span class="g-name-text">${person.name}</span>
+      <span class="g-leave-count">${totalDays}วัน</span>
+    </div>`;
+
+    dates.forEach(d => {
+      const we = d.getDay() === 0 || d.getDay() === 6;
+      const isT = d.getTime() === TODAY.getTime();
+      h += `<div class="g-row-cell${we ? ' we' : ''}${isT ? ' tday' : ''}"></div>`;
     });
   });
 
-  // workload row
-  const wlMap={};
-  filteredRows.forEach(r=>{
-    if(!r.startDate||!r.endDate)return;
-    for(let d=new Date(r.startDate);d<=r.endDate;d=addDays(d,1)){
-      const k=d.toISOString().slice(0,10);wlMap[k]=(wlMap[k]||0)+1;
+  // workload row — count people on leave per day
+  const wlMap = {};
+  filteredLeaves.forEach(r => {
+    for (let d = new Date(r.start); d <= r.end; d = addDays(d, 1)) {
+      const k = d.toISOString().slice(0, 10);
+      wlMap[k] = (wlMap[k] || 0) + 1;
     }
   });
-  const maxWL=Math.max(1,...dates.map(d=>wlMap[d.toISOString().slice(0,10)]||0));
+  const maxWL = Math.max(1, ...dates.map(d => wlMap[d.toISOString().slice(0, 10)] || 0));
 
-  h+=`<div class="g-wl-name">🔴 คนลา/วัน</div>`;
-  dates.forEach(d=>{
-    const k=d.toISOString().slice(0,10),cnt=wlMap[k]||0;
-    const clr=cnt===0?'transparent':cnt===1?'var(--green)':cnt<=2?'var(--yellow)':'var(--red)';
-    const pct=Math.max(0,cnt/maxWL);
-    const bh=Math.max(cnt>0?6:0,pct*26);
-    h+=`<div class="g-wl-cell"><div class="wl-bar" style="background:${clr};height:${bh}px">${cnt>0&&bh>10?`<span class="wl-num">${cnt}</span>`:''}</div></div>`;
+  h += `<div class="g-wl-name">🔴 คนลา/วัน</div>`;
+  dates.forEach(d => {
+    const k = d.toISOString().slice(0, 10), cnt = wlMap[k] || 0;
+    const clr = cnt === 0 ? 'transparent' : cnt === 1 ? 'var(--green)' : cnt <= 2 ? 'var(--yellow)' : 'var(--red)';
+    const bh = Math.max(cnt > 0 ? 5 : 0, (cnt / maxWL) * 28);
+    h += `<div class="g-wl-cell">
+      <div class="wl-bar" style="background:${clr};height:${bh}px">
+        ${cnt > 0 && bh > 11 ? `<span class="wl-num">${cnt}</span>` : ''}
+      </div>
+    </div>`;
   });
 
-  gantt.innerHTML=h;
+  gantt.innerHTML = h;
 
-  // overlay leave bars
-  requestAnimationFrame(()=>{
-    const allCells=gantt.querySelectorAll('.g-row-cell');
-    const perPerson=dates.length;
-    pOrder.forEach((name,pi)=>{
-      pMap[name].forEach(r=>{
-        if(!r.startDate||!r.endDate)return;
-        const bs=r.startDate<viewStart?viewStart:r.startDate;
-        const be=r.endDate>vend?vend:r.endDate;
-        if(bs>vend||be<viewStart)return;
-        const si=Math.round((bs-viewStart)/864e5);
-        const ei=Math.round((be-viewStart)/864e5);
-        const cell=allCells[pi*perPerson+si];
-        if(!cell)return;
-        const span=ei-si+1;
-        const{fg,bg}=typeClr(r.type);
-        const bar=document.createElement('div');
-        bar.className='leave-bar';
-        bar.style.cssText=`background:${bg};color:${fg};border:1px solid ${fg};width:calc(${span*CW}px - 4px);`;
-        bar.textContent=span>2?(r.type||'ลา'):'';
-        bar.addEventListener('mouseenter',e=>{
-          document.getElementById('tt-name').textContent=r.name;
-          document.getElementById('tt-dates').textContent=`📅 ${r.startFmt}${r.endFmt&&r.endFmt!==r.startFmt?' – '+r.endFmt:''}`;
-          document.getElementById('tt-days').textContent=`⏱ ${r.days} วัน`;
-          const{fg:f,bg:b}=typeClr(r.type);
-          document.getElementById('tt-type').innerHTML=r.type?`<span class="tt-badge" style="background:${b};color:${f}">${r.type}</span>`:'';
+  // overlay bars (after DOM)
+  requestAnimationFrame(() => {
+    const allCells = gantt.querySelectorAll('.g-row-cell');
+    const perPerson = dates.length;
+
+    filteredPersons.forEach((person, pi) => {
+      person.periods.forEach(r => {
+        const bs = r.start < viewStart ? viewStart : r.start;
+        const be = r.end > vend ? vend : r.end;
+        if (bs > vend || be < viewStart) return;
+
+        const si = Math.round((bs - viewStart) / 864e5);
+        const ei = Math.round((be - viewStart) / 864e5);
+        const cell = allCells[pi * perPerson + si];
+        if (!cell) return;
+
+        const span = ei - si + 1;
+        const { fg, bg } = PERIOD_COLORS[r.periodIdx % PERIOD_COLORS.length];
+        const bar = document.createElement('div');
+        bar.className = 'leave-bar';
+        bar.style.cssText = `background:${bg};color:${fg};border:1px solid ${fg};width:calc(${span * CW}px - 4px);`;
+        bar.textContent = span > 3 ? r.label : span > 1 ? 'P' + (r.periodIdx + 1) : '';
+
+        // tooltip
+        bar.addEventListener('mouseenter', e => {
+          document.getElementById('tt-name').textContent = person.name;
+          document.getElementById('tt-dates').textContent = `📅 ${r.startFmt} – ${r.endFmt}`;
+          document.getElementById('tt-days').textContent = `⏱ ${r.days} วัน`;
+          document.getElementById('tt-type').innerHTML =
+            `<span class="tt-badge" style="background:${bg};color:${fg}">${r.label}</span>`;
           document.getElementById('tooltip').classList.add('show');
           moveTT(e);
         });
-        bar.addEventListener('mousemove',moveTT);
-        bar.addEventListener('mouseleave',()=>document.getElementById('tooltip').classList.remove('show'));
+        bar.addEventListener('mousemove', moveTT);
+        bar.addEventListener('mouseleave', () => document.getElementById('tooltip').classList.remove('show'));
         cell.appendChild(bar);
       });
     });
   });
 }
 
-function moveTT(e){
-  const tt=document.getElementById('tooltip');
-  let x=e.clientX+14,y=e.clientY+14;
-  if(x+240>window.innerWidth)x=e.clientX-240;
-  if(y+120>window.innerHeight)y=e.clientY-120;
-  tt.style.left=x+'px';tt.style.top=y+'px';
+function moveTT(e) {
+  const tt = document.getElementById('tooltip');
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + 250 > window.innerWidth) x = e.clientX - 250;
+  if (y + 120 > window.innerHeight) y = e.clientY - 120;
+  tt.style.left = x + 'px'; tt.style.top = y + 'px';
 }
 
-// ── SUMMARY / LEGEND ──────────────────────────────────
-function renderSummary(){
-  const onLeave=filteredRows.filter(r=>r.startDate&&r.endDate&&r.startDate<=TODAY&&r.endDate>=TODAY);
-  const names=[...new Set(filteredRows.map(r=>r.name))];
-  const totalDays=filteredRows.reduce((s,r)=>s+(r.days||1),0);
-  document.getElementById('sum-strip').innerHTML=`
-    <div class="scard"><div class="scard-dot" style="background:var(--orange)"></div><span class="scard-val" style="color:var(--orange)">${filteredRows.length}</span><span class="scard-lbl">รายการลา</span></div>
-    <div class="scard"><div class="scard-dot" style="background:var(--blue)"></div><span class="scard-val" style="color:var(--blue)">${names.length}</span><span class="scard-lbl">พนักงาน</span></div>
-    <div class="scard"><div class="scard-dot" style="background:var(--green)"></div><span class="scard-val" style="color:var(--green)">${totalDays}</span><span class="scard-lbl">วันลารวม</span></div>
-    <div class="scard"><div class="scard-dot" style="background:var(--red)"></div><span class="scard-val" style="color:var(--red)">${onLeave.length}</span><span class="scard-lbl">ลาวันนี้</span></div>`;
+// ── SUMMARY + LEGEND ──────────────────────────────────
+function renderSummary() {
+  const onLeave = filteredPersons.filter(p =>
+    p.periods.some(r => r.start <= TODAY && r.end >= TODAY)
+  );
+  const totalDays = filteredLeaves.reduce((s, r) => s + r.days, 0);
+  const maxPeriods = Math.max(0, ...filteredPersons.map(p => p.periods.length));
 
-  const types=[...new Set(filteredRows.map(r=>r.type).filter(Boolean))].sort();
-  document.getElementById('legend').innerHTML=
-    types.map(t=>`<div class="leg-item"><div class="leg-dot" style="background:${typeClr(t).fg}"></div>${t}</div>`).join('')+
-    `<div class="leg-item" style="margin-left:auto"><div class="leg-dot" style="background:var(--green)"></div>1 คนลา</div>
-     <div class="leg-item"><div class="leg-dot" style="background:var(--yellow)"></div>2 คน</div>
-     <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>3+ คน</div>`;
+  document.getElementById('sum-strip').innerHTML = `
+    <div class="scard"><div class="scard-dot" style="background:var(--orange)"></div>
+      <span class="scard-val" style="color:var(--orange)">${filteredPersons.length}</span>
+      <span class="scard-lbl">พนักงาน</span></div>
+    <div class="scard"><div class="scard-dot" style="background:var(--blue)"></div>
+      <span class="scard-val" style="color:var(--blue)">${filteredLeaves.length}</span>
+      <span class="scard-lbl">รายการลา</span></div>
+    <div class="scard"><div class="scard-dot" style="background:var(--green)"></div>
+      <span class="scard-val" style="color:var(--green)">${totalDays}</span>
+      <span class="scard-lbl">วันลารวม</span></div>
+    <div class="scard"><div class="scard-dot" style="background:var(--red)"></div>
+      <span class="scard-val" style="color:var(--red)">${onLeave.length}</span>
+      <span class="scard-lbl">ลาวันนี้</span></div>`;
+
+  // legend: period colors
+  const legendItems = [];
+  for (let i = 0; i < Math.min(maxPeriods, PERIOD_COLORS.length); i++) {
+    const { fg } = PERIOD_COLORS[i];
+    legendItems.push(`<div class="leg-item"><div class="leg-dot" style="background:${fg}"></div>Period ${i + 1}</div>`);
+  }
+  legendItems.push(`
+    <div class="leg-item" style="margin-left:auto"><div class="leg-dot" style="background:var(--green)"></div>1 คนลา</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--yellow)"></div>2 คน</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>3+ คน</div>`);
+  document.getElementById('legend').innerHTML = legendItems.join('');
 }
 
-function renderPeriodLabel(){
-  const vend=addDays(viewStart,viewDays-1);
-  document.getElementById('period-lbl').textContent=`${fmtShort(viewStart)} – ${fmtShort(vend)} ${viewStart.getFullYear()+543}`;
+function renderPeriodLabel() {
+  const vend = addDays(viewStart, viewDays - 1);
+  document.getElementById('period-lbl').textContent =
+    `${fmtShort(viewStart)} – ${fmtShort(vend)} ${viewStart.getFullYear() + 543}`;
 }
 
-// ── FILTERS ──────────────────────────────────────────
-function applyFilters(){
-  const q=document.getElementById('search-inp').value.toLowerCase();
-  const t=document.getElementById('type-sel').value;
-  filteredRows=allRows.filter(r=>{
-    if(q&&!r.name.toLowerCase().includes(q))return false;
-    if(t&&r.type!==t)return false;
-    return true;
-  });
-  renderSummary();buildGantt();
-}
-
-function populateFilters(){
-  const types=[...new Set(allRows.map(r=>r.type).filter(Boolean))].sort();
-  document.getElementById('type-sel').innerHTML='<option value="">ทั้งหมด</option>'+types.map(t=>`<option value="${t}">${t}</option>`).join('');
+// ── FILTER ────────────────────────────────────────────
+function applyFilter() {
+  const q = document.getElementById('search-inp').value.toLowerCase();
+  filteredPersons = persons.filter(p => !q || p.name.toLowerCase().includes(q));
+  filteredLeaves = allLeaves.filter(r => !q || r.name.toLowerCase().includes(q));
+  renderSummary();
+  buildGantt();
 }
 
 // ── LOAD ─────────────────────────────────────────────
-async function loadData(){
-  const btn=document.getElementById('ref-btn');
+async function loadData() {
+  const btn = document.getElementById('ref-btn');
   btn.classList.add('spin');
-  document.getElementById('err-area').innerHTML='';
-  try{
-    const cfg=loadCfg();
-    const tbl=await fetchData(cfg);
-    allRows=parseTable(tbl,cfg);
-    filteredRows=[...allRows];
-    populateFilters();renderSummary();renderPeriodLabel();buildGantt();
-    document.getElementById('lupd').textContent='อัปเดต '+new Date().toLocaleTimeString('th-TH');
-  }catch(err){
-    let msg=err.message||'โหลดไม่สำเร็จ';
-    let hint='';
-    if(/401|403|PERMISSION/i.test(msg))hint='<br/>⚠️ ตรวจสอบว่า Sheet แชร์เป็น <b>Anyone with the link → Viewer</b>';
-    else if(/404|not found/i.test(msg))hint='<br/>⚠️ ไม่พบ Sheet นี้ ตรวจสอบ Spreadsheet ID';
-    document.getElementById('err-area').innerHTML=`<div class="err">❌ ${msg}${hint}<br/><br/>💡 คลิก ⚙️ เพื่อตั้งค่า Sheet ID / ชื่อ Tab / คอลัมน์</div>`;
-    allRows=[];filteredRows=[];renderSummary();buildGantt();
-  }finally{
+  document.getElementById('err-area').innerHTML = '';
+  const cfg = loadCfg();
+  try {
+    const table = await fetchSheet(cfg.sheetId, cfg.sheetName || 'period');
+    const parsed = parsePeriodSheet(table);
+    persons = parsed.persons;
+    allLeaves = parsed.leaves;
+
+    if (persons.length === 0) {
+      document.getElementById('err-area').innerHTML =
+        `<div class="info-box">ℹ️ ไม่พบข้อมูลใน Sheet "<b>${cfg.sheetName || 'period'}</b>" หรือยังไม่มีวันที่ใส่ไว้<br/>
+        ตรวจสอบว่าคอลัมน์ B = ชื่อ, C = วันเริ่ม, D = วันสิ้นสุด และรูปแบบวันที่เป็น DD-MM-YYYY</div>`;
+    }
+
+    filteredPersons = [...persons];
+    filteredLeaves = [...allLeaves];
+
+    // auto-set view to cover all leave dates
+    if (allLeaves.length > 0) {
+      const starts = allLeaves.map(r => r.start).filter(Boolean);
+      const minDate = starts.reduce((a, b) => a < b ? a : b, starts[0]);
+      // center today if today is within range, else jump to first leave
+      if (TODAY >= minDate) viewStart = d0(TODAY);
+      else viewStart = d0(minDate);
+    }
+
+    renderSummary();
+    renderPeriodLabel();
+    buildGantt();
+    document.getElementById('lupd').textContent = 'อัปเดต ' + new Date().toLocaleTimeString('th-TH');
+  } catch (err) {
+    let msg = err.message || 'โหลดไม่สำเร็จ';
+    let hint = '';
+    if (/401|403|PERMISSION/i.test(msg)) hint = '<br/>⚠️ Sheet ต้องแชร์เป็น <b>Anyone with the link → Viewer</b>';
+    else if (/404|not found/i.test(msg)) hint = '<br/>⚠️ ไม่พบ Sheet นี้ ตรวจสอบ Spreadsheet ID';
+    document.getElementById('err-area').innerHTML =
+      `<div class="err">❌ ${msg}${hint}<br/><br/>💡 คลิก ⚙️ เพื่อตั้งค่า Sheet ID และชื่อ Tab</div>`;
+    persons = []; allLeaves = []; filteredPersons = []; filteredLeaves = [];
+    renderSummary(); buildGantt();
+  } finally {
     btn.classList.remove('spin');
-    document.getElementById('loading').style.display='none';
+    document.getElementById('loading').style.display = 'none';
   }
 }
 
-// ── EVENTS ───────────────────────────────────────────
-document.getElementById('zoom-sel').addEventListener('change',e=>{viewDays=+e.target.value;renderPeriodLabel();buildGantt();});
-document.getElementById('prev-btn').addEventListener('click',()=>{viewStart=addDays(viewStart,-viewDays);renderPeriodLabel();buildGantt();});
-document.getElementById('next-btn').addEventListener('click',()=>{viewStart=addDays(viewStart,viewDays);renderPeriodLabel();buildGantt();});
-document.getElementById('today-btn').addEventListener('click',()=>{viewStart=d0(new Date());renderPeriodLabel();buildGantt();});
-document.getElementById('ref-btn').addEventListener('click',loadData);
-document.getElementById('search-inp').addEventListener('input',applyFilters);
-document.getElementById('type-sel').addEventListener('change',applyFilters);
+// ── EVENTS ────────────────────────────────────────────
+document.getElementById('zoom-sel').addEventListener('change', e => {
+  viewDays = +e.target.value; renderPeriodLabel(); buildGantt();
+});
+document.getElementById('prev-btn').addEventListener('click', () => {
+  viewStart = addDays(viewStart, -viewDays); renderPeriodLabel(); buildGantt();
+});
+document.getElementById('next-btn').addEventListener('click', () => {
+  viewStart = addDays(viewStart, viewDays); renderPeriodLabel(); buildGantt();
+});
+document.getElementById('today-btn').addEventListener('click', () => {
+  viewStart = d0(new Date()); renderPeriodLabel(); buildGantt();
+});
+document.getElementById('ref-btn').addEventListener('click', loadData);
+document.getElementById('search-inp').addEventListener('input', applyFilter);
 
-document.getElementById('cfg-btn').addEventListener('click',()=>{
-  const c=loadCfg();
-  document.getElementById('c-id').value=c.sheetId||'';
-  document.getElementById('c-tab').value=c.sheetName||'';
-  document.getElementById('c-cn').value=c.colName||'A';
-  document.getElementById('c-cs').value=c.colStart||'B';
-  document.getElementById('c-ce').value=c.colEnd||'C';
-  document.getElementById('c-ct').value=c.colType||'D';
-  document.getElementById('c-cst').value=c.colStatus||'E';
-  document.getElementById('c-dr').value=c.dataRow||2;
+document.getElementById('cfg-btn').addEventListener('click', () => {
+  const c = loadCfg();
+  document.getElementById('c-id').value = c.sheetId || '';
+  document.getElementById('c-tab').value = c.sheetName || 'period';
   document.getElementById('modal-bg').classList.add('open');
 });
-document.getElementById('m-cancel').addEventListener('click',()=>document.getElementById('modal-bg').classList.remove('open'));
-document.getElementById('m-save').addEventListener('click',()=>{
-  saveCfg({sheetId:document.getElementById('c-id').value.trim(),sheetName:document.getElementById('c-tab').value.trim(),colName:document.getElementById('c-cn').value.trim()||'A',colStart:document.getElementById('c-cs').value.trim()||'B',colEnd:document.getElementById('c-ce').value.trim()||'C',colType:document.getElementById('c-ct').value.trim()||'D',colStatus:document.getElementById('c-cst').value.trim()||'E',dataRow:parseInt(document.getElementById('c-dr').value)||2});
+document.getElementById('m-cancel').addEventListener('click', () =>
+  document.getElementById('modal-bg').classList.remove('open'));
+document.getElementById('m-save').addEventListener('click', () => {
+  saveCfg({
+    sheetId: document.getElementById('c-id').value.trim(),
+    sheetName: document.getElementById('c-tab').value.trim() || 'period',
+  });
   document.getElementById('modal-bg').classList.remove('open');
-  document.getElementById('loading').style.display='flex';
+  document.getElementById('loading').style.display = 'flex';
   loadData();
 });
 
-// ── INIT ─────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────
 renderPeriodLabel();
 loadData();
 </script>
