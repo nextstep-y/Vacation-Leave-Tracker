@@ -300,14 +300,21 @@ function parsePeriodSheet(table) {
   const result = [];   // { name, periods[] }
   const allLeaves = []; // flat for Gantt
 
-  // skip row 0 (header)
-  for (let ri = 1; ri < rows.length; ri++) {
+  // gviz uses row 0 of table.rows as first DATA row (header becomes col labels)
+  // so iterate all rows; skip if col B looks like a header word or is empty
+  const SKIP_NAMES = /^(name|employee|พนักงาน|ชื่อ|no\.?|header|engineers|chief)$/i;
+
+  for (let ri = 0; ri < rows.length; ri++) {
     const cells = rows[ri].c || [];
     const getv = i => (i < cells.length && cells[i] && cells[i].v !== null) ? cells[i].v : null;
     const getf = i => (i < cells.length && cells[i]) ? (cells[i].f || cells[i].v || null) : null;
 
-    const name = String(getv(1) || '').trim();
+    const raw = getv(1);
+    const name = String(raw ?? '').trim();
+    // skip empty, pure-numeric (row numbers), or known header words
     if (!name) continue;
+    if (/^\d+$/.test(name)) continue;
+    if (SKIP_NAMES.test(name)) continue;
 
     const periods = [];
     // col index: C=2, D=3, E=4, F=5, G=6, H=7 …
