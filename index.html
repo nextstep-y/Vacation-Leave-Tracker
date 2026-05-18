@@ -138,7 +138,7 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
 </head>
 <body>
 
-<div id="loading"><div class="ring"></div><p>กำลังโหลดข้อมูล…</p></div>
+<div id="loading"><div class="ring"></div><p>Loading data…</p></div>
 
 <div id="tooltip">
   <div class="tt-name" id="tt-name"></div>
@@ -154,39 +154,39 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
   </div>
   <div class="hright">
     <span id="lupd"></span>
-    <button class="icon-btn" id="cfg-btn" title="ตั้งค่า">⚙️</button>
+    <button class="icon-btn" id="cfg-btn" title="Settings">⚙️</button>
     <button class="refresh-btn" id="ref-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M1 4v6h6M23 20v-6h-6"/>
         <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/>
-      </svg>รีเฟรช
+      </svg>Refresh
     </button>
   </div>
 </header>
 
 <div class="controls">
   <div class="ctrl-group">
-    <label>ช่วงเวลา</label>
+    <label>Period</label>
     <div style="display:flex;align-items:center;gap:6px">
       <button class="nav-btn" id="prev-btn">‹</button>
       <span class="period-label" id="period-lbl"></span>
       <button class="nav-btn" id="next-btn">›</button>
-      <button class="today-btn" id="today-btn">วันนี้</button>
+      <button class="today-btn" id="today-btn">Today</button>
     </div>
   </div>
   <div class="ctrl-group">
-    <label>มุมมอง</label>
+    <label>View</label>
     <select id="zoom-sel">
-      <option value="30">รายเดือน (30 วัน)</option>
-      <option value="60">2 เดือน</option>
-      <option value="90">3 เดือน</option>
-      <option value="180">6 เดือน</option>
-      <option value="365">รายปี</option>
+      <option value="30">Monthly (30 days)</option>
+      <option value="60">2 Months</option>
+      <option value="90">3 Months</option>
+      <option value="180">6 Months</option>
+      <option value="365">Yearly</option>
     </select>
   </div>
   <div class="ctrl-group" style="margin-left:auto">
-    <label>ค้นหาพนักงาน</label>
-    <input type="text" id="search-inp" placeholder="พิมพ์ชื่อ…" style="width:150px"/>
+    <label>Search Employee</label>
+    <input type="text" id="search-inp" placeholder="Type name…" style="width:150px"/>
   </div>
 </div>
 
@@ -198,25 +198,25 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
 <!-- CONFIG MODAL -->
 <div class="modal-bg" id="modal-bg">
   <div class="modal">
-    <h3>⚙️ ตั้งค่า Google Sheet</h3>
+    <h3>⚙️ Configure Google Sheet</h3>
     <div class="mrow">
       <label>Spreadsheet ID</label>
       <input id="c-id"/>
-      <p class="hint">จาก URL: …/spreadsheets/d/<b style="color:var(--orange)">ID</b>/edit</p>
+      <p class="hint">From URL: …/spreadsheets/d/<b style="color:var(--orange)">ID</b>/edit</p>
     </div>
     <div class="mrow">
-      <label>ชื่อ Sheet ข้อมูล (period tab)</label>
+      <label>Data Sheet Name (period tab)</label>
       <input id="c-tab" placeholder="period"/>
-      <p class="hint">ชื่อ tab ที่มีคอลัมน์ชื่อ, วันเริ่ม, วันสิ้นสุด</p>
+      <p class="hint">Name tab with columns: Name,, Start date, End date</p>
     </div>
     <p style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6">
-      <b style="color:var(--text)">โครงสร้าง Sheet "period" ที่รองรับ:</b><br/>
-      คอลัมน์ A = No. | B = ชื่อพนักงาน | C = วันเริ่ม P1 | D = วันสิ้นสุด P1 | E = วันเริ่ม P2 | F = วันสิ้นสุด P2 | …<br/>
-      รูปแบบวันที่: <b>DD-MM-YYYY</b> หรือ <b>DD/MM/YYYY</b>
+      <b style="color:var(--text)">Expected Sheet "period" structure:</b><br/>
+      Col A = No. | B = Employee Name | C = Start date P1 | D = End date P1 | E = Start date P2 | F = End date P2 | …<br/>
+      Date format: <b>DD-MM-YYYY</b> or <b>DD/MM/YYYY</b>
     </p>
     <div class="mbtns">
-      <button class="btn-s" id="m-cancel">ยกเลิก</button>
-      <button class="btn-p" id="m-save">💾 บันทึกและโหลด</button>
+      <button class="btn-s" id="m-cancel">Cancel</button>
+      <button class="btn-p" id="m-save">💾 Save & Reload</button>
     </div>
   </div>
 </div>
@@ -231,69 +231,82 @@ const DEF = {
 const loadCfg = () => { try { return { ...DEF, ...JSON.parse(localStorage.getItem(SK) || '{}') }; } catch { return { ...DEF }; } };
 const saveCfg = c => localStorage.setItem(SK, JSON.stringify(c));
 
-// ── DATE UTILS ─────────────────────────────────────────
-const d0 = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
-const addDays = (d, n) => new Date(d.getTime() + n * 864e5);
-const fmtTH = d => d ? d.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-const fmtShort = d => d ? d.toLocaleDateString('th-TH', { day: '2-digit', month: 'short' }) : '—';
-const DAY_TH = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
-const MON_TH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-const TODAY = d0(new Date());
-
-// Parse any date format from gviz / Google Sheets
-// Handles: Date(y,m,d) | DD-MM-YYYY | DD/MM/YYYY | M/D/YYYY | YYYY-MM-DD | serial number
+// ── DATE UTILS (all UTC-midnight to avoid timezone drift) ──
+// Store dates as UTC midnight timestamps
+function utcDay(y, m, d) {
+  // m = 1-based month
+  return Date.UTC(y, m - 1, d);
+}
 function parseDate(v) {
-  if (v === null || v === undefined || v === '') return null;
+  if (v === null || v === undefined) return null;
   const s = String(v).trim();
-  if (!s) return null;
+  if (!s || s === 'null') return null;
 
   let m;
 
-  // 1) gviz JS Date literal: Date(2026,6,3)  ← month is 0-based!
+  // gviz: Date(2026,6,3) — month is 0-based
   m = s.match(/Date\((\d+),(\d+),(\d+)\)/);
-  if (m) return d0(new Date(+m[1], +m[2], +m[3]));
+  if (m) return utcDay(+m[1], +m[2] + 1, +m[3]);
 
-  // 2) DD-MM-YYYY  or  DD/MM/YYYY  (day first — Thai convention)
+  // DD-MM-YYYY or DD/MM/YYYY (Thai convention, day first)
   m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
   if (m) {
-    const day = +m[1], mon = +m[2], yr = +m[3];
-    // sanity: day 1-31, month 1-12
-    if (day >= 1 && day <= 31 && mon >= 1 && mon <= 12)
-      return d0(new Date(yr, mon - 1, day));
+    const dd = +m[1], mm = +m[2], yy = +m[3];
+    if (dd >= 1 && dd <= 31 && mm >= 1 && mm <= 12 && yy > 1900)
+      return utcDay(yy, mm, dd);
   }
 
-  // 3) YYYY-MM-DD
+  // YYYY-MM-DD
   m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (m) return d0(new Date(+m[1], +m[2] - 1, +m[3]));
+  if (m) return utcDay(+m[1], +m[2], +m[3]);
 
-  // 4) Excel/Sheets serial number (numeric string like "46845")
-  if (/^\d{4,6}$/.test(s)) {
-    const serial = +s;
-    if (serial > 40000 && serial < 60000) {
-      // Sheets epoch: Dec 30 1899
-      return d0(new Date(Math.round((serial - 25569) * 864e5)));
-    }
+  // M/D/YYYY (US format, but only if day>12 to distinguish from DD/MM)
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) {
+    const a = +m[1], b = +m[2], yy = +m[3];
+    // if a <= 12 and b <= 12 it's ambiguous — assume DD/MM (Thai)
+    if (a >= 1 && a <= 31 && b >= 1 && b <= 12)
+      return utcDay(yy, b, a);   // DD/MM
   }
 
-  // 5) Fallback: let JS try (handles ISO strings etc.)
-  const fd = new Date(s);
-  return isNaN(fd.getTime()) ? null : d0(fd);
+  return null;
 }
 
-function diffDays(s, e) {
-  return Math.max(1, Math.round((e - s) / 864e5) + 1);
+function tsToDate(ts) {
+  // ts = UTC midnight ms
+  return new Date(ts);
 }
 
-// ── PALETTE ───────────────────────────────────────────
-// One color per period index (Period 1, 2, 3 …)
+function addDays(ts, n) { return ts + n * 864e5; }
+function diffDays(s, e) { return Math.max(1, Math.round((e - s) / 864e5) + 1); }
+
+function fmtTH(ts) {
+  if (ts == null) return '—';
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+function fmtShort(ts) {
+  if (ts == null) return '—';
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', timeZone: 'UTC' });
+}
+
+const DAY_TH = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MON_TH = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// TODAY as UTC midnight
+const _now = new Date();
+const TODAY = Date.UTC(_now.getFullYear(), _now.getMonth(), _now.getDate());
+
+// ── COLORS ────────────────────────────────────────────
 const PERIOD_COLORS = [
-  { fg: '#F97316', bg: 'rgba(249,115,22,.25)'  },  // P1 orange
-  { fg: '#3B82F6', bg: 'rgba(59,130,246,.25)'  },  // P2 blue
-  { fg: '#22C55E', bg: 'rgba(34,197,94,.25)'   },  // P3 green
-  { fg: '#A855F7', bg: 'rgba(168,85,247,.25)'  },  // P4 purple
-  { fg: '#EAB308', bg: 'rgba(234,179,8,.25)'   },  // P5 yellow
-  { fg: '#EC4899', bg: 'rgba(236,72,153,.25)'  },  // P6 pink
-  { fg: '#14B8A6', bg: 'rgba(20,184,166,.25)'  },  // P7 teal
+  { fg: '#F97316', bg: 'rgba(249,115,22,.28)' },
+  { fg: '#3B82F6', bg: 'rgba(59,130,246,.28)' },
+  { fg: '#22C55E', bg: 'rgba(34,197,94,.28)'  },
+  { fg: '#A855F7', bg: 'rgba(168,85,247,.28)' },
+  { fg: '#EAB308', bg: 'rgba(234,179,8,.28)'  },
+  { fg: '#EC4899', bg: 'rgba(236,72,153,.28)' },
+  { fg: '#14B8A6', bg: 'rgba(20,184,166,.28)' },
 ];
 const AVC = ['#F97316','#3B82F6','#22C55E','#A855F7','#EAB308','#EC4899','#14B8A6','#F43F5E'];
 
@@ -309,94 +322,82 @@ async function fetchSheet(sheetId, sheetName) {
   return json.table;
 }
 
-// ── PARSE "period" sheet ──────────────────────────────
-// Layout: A=No | B=Name | C=P1Start | D=P1End | E=P2Start | F=P2End ...
-// Date format in sheet: DD-MM-YYYY (plain text string)
-// gviz may return date strings in v OR f field — we try all combinations
+// ── PARSE ─────────────────────────────────────────────
 function parsePeriodSheet(table) {
   const rows = table.rows || [];
   const cols = table.cols || [];
-  const result = [];
-  const allLeaves = [];
+  const result = [], allLeaves = [];
 
-  console.log('[period] cols:', cols.map((c,i) => `[${i}]${c.label}(${c.type})`));
-  console.log('[period] total rows:', rows.length);
+  console.log('[PERIOD] cols:', cols.map((c,i)=>`[${i}]"${c.label}"(${c.type})`).join(', '));
 
-  // Extract best string value from a gviz cell — try v then f then label
   function cellStr(cells, i) {
     if (i >= cells.length || !cells[i]) return '';
     const c = cells[i];
-    // gviz date cells: v = "Date(2026,6,3)", f = "03-07-2026" or "3/7/2026"
-    // gviz string cells: v = "03-07-2026", f = null
-    // try f first (formatted), then v (raw)
-    const f = c.f != null ? String(c.f).trim() : '';
-    const v = c.v != null ? String(c.v).trim() : '';
-    return f || v;
+    // For date-type columns: v="Date(y,m,d)", f="3/7/2026" or "03-07-2026"
+    // For string-type columns: v="03-07-2026", f=null
+    // Try: v first (for Date() literal), then f (for formatted date string), then v as string
+    const vRaw = c.v != null ? String(c.v).trim() : '';
+    const fRaw = c.f != null ? String(c.f).trim() : '';
+    // If v looks like a Date() literal, prefer it
+    if (vRaw.startsWith('Date(')) return vRaw;
+    // Otherwise prefer f (formatted), fallback to v
+    return fRaw || vRaw;
   }
 
-  const SKIP = /^(no\.?|no|employee\.?name\.?|period\s*\d|start|end|name|พนักงาน|ชื่อ)$/i;
+  const SKIP = /^(no\.?|no|employee.*name|period\s*\d|start|end|name|Employees|Name|day)$/i;
 
   for (let ri = 0; ri < rows.length; ri++) {
     const cells = rows[ri].c || [];
-
-    // col B = index 1 = name
     const name = cellStr(cells, 1);
     if (!name) continue;
-    if (/^\d+$/.test(name)) continue;  // skip row numbers
-    if (SKIP.test(name)) continue;      // skip header words
-
-    console.log(`[period] row ${ri} name="${name}"`);
+    if (/^\d+$/.test(name)) continue;
+    if (SKIP.test(name.trim())) continue;
 
     const periods = [];
-    let pIdx = 0;
-    while (pIdx < 10) {
-      const sc = 2 + pIdx * 2;  // C, E, G, ...
-      const ec = 3 + pIdx * 2;  // D, F, H, ...
+    for (let pIdx = 0; pIdx < 10; pIdx++) {
+      const sc = 2 + pIdx * 2;
+      const ec = 3 + pIdx * 2;
       if (sc >= cells.length) break;
 
       const sv = cellStr(cells, sc);
       const ev = cellStr(cells, ec);
-      console.log(`  period ${pIdx+1}: start="${sv}" end="${ev}"`);
+
+      console.log(`[PERIOD] row${ri} "${name}" P${pIdx+1}: start="${sv}" end="${ev}"`);
 
       const sd = parseDate(sv);
-      const ed = parseDate(ev) || sd;
+      const ed = parseDate(ev) != null ? parseDate(ev) : sd;
 
-      if (sd) {
+      if (sd != null) {
         const days = diffDays(sd, ed);
-        periods.push({
-          start: sd, end: ed, days,
-          label: `Period ${pIdx + 1}`,
-          periodIdx: pIdx,
-          startFmt: fmtTH(sd),
-          endFmt: fmtTH(ed),
-        });
-        console.log(`  ✓ parsed: ${fmtTH(sd)} – ${fmtTH(ed)} (${days}d)`);
+        periods.push({ start: sd, end: ed, days,
+          label: `Period ${pIdx+1}`, periodIdx: pIdx,
+          startFmt: fmtTH(sd), endFmt: fmtTH(ed) });
+        console.log(`  ✓ ${fmtTH(sd)} – ${fmtTH(ed)} = ${days}d`);
       } else {
-        console.log(`  ✗ no valid date`);
-        if (!sv && !ev) break; // no more data in this row
+        if (!sv && !ev) break;
       }
-      pIdx++;
     }
 
     result.push({ name, periods });
     periods.forEach(p => allLeaves.push({ name, ...p }));
+    console.log(`[PERIOD] "${name}" => ${periods.length} period(s)`);
   }
-
-  console.log('[period] persons found:', result.map(p => p.name + '(' + p.periods.length + 'periods)'));
   return { persons: result, leaves: allLeaves };
 }
 
 // ── STATE ─────────────────────────────────────────────
 let persons = [], allLeaves = [], filteredPersons = [], filteredLeaves = [];
-let viewStart = d0(new Date()), viewDays = 30;
+let viewStart = TODAY, viewDays = 30;
 
 // ── GANTT ──────────────────────────────────────────────
 const NW = 180, CW = 30;
 
 function buildGantt() {
   const vend = addDays(viewStart, viewDays - 1);
+
+  // build array of UTC midnight timestamps for each day
   const dates = [];
-  for (let d = new Date(viewStart); d <= vend; d = addDays(d, 1)) dates.push(new Date(d));
+  for (let ts = viewStart; ts <= vend; ts = addDays(ts, 1)) dates.push(ts);
 
   const gantt = document.getElementById('gantt');
   gantt.style.gridTemplateColumns = `${NW}px repeat(${dates.length}, ${CW}px)`;
@@ -407,62 +408,62 @@ function buildGantt() {
   h += `<div class="g-month-corner"></div>`;
   let mi = 0;
   while (mi < dates.length) {
-    const m = dates[mi].getMonth(), y = dates[mi].getFullYear();
+    const d = new Date(dates[mi]);
+    const m = d.getUTCMonth(), y = d.getUTCFullYear();
     let cnt = 0;
-    while (mi + cnt < dates.length && dates[mi + cnt].getMonth() === m) cnt++;
+    while (mi + cnt < dates.length) {
+      const dd = new Date(dates[mi + cnt]);
+      if (dd.getUTCMonth() !== m) break;
+      cnt++;
+    }
     h += `<div class="g-month-cell" style="grid-column:span ${cnt}">${MON_TH[m]} ${y + 543}</div>`;
     mi += cnt;
   }
 
   // date header
-  h += `<div class="g-corner">พนักงาน / วันที่</div>`;
-  dates.forEach(d => {
-    const we = d.getDay() === 0 || d.getDay() === 6;
-    const isT = d.getTime() === TODAY.getTime();
+  h += `<div class="g-corner">Employees / Date</div>`;
+  dates.forEach(ts => {
+    const d = new Date(ts);
+    const dow = d.getUTCDay();
+    const we = dow === 0 || dow === 6;
+    const isT = ts === TODAY;
     h += `<div class="g-date-cell${we ? ' we' : ''}${isT ? ' tday' : ''}">
-      <span class="d-num">${d.getDate()}</span>
-      <span class="d-day">${DAY_TH[d.getDay()]}</span>
+      <span class="d-num">${d.getUTCDate()}</span>
+      <span class="d-day">${DAY_TH[dow]}</span>
     </div>`;
   });
 
-  if (filteredPersons.length === 0) {
-    h += `<div class="g-empty">🔍 ไม่พบข้อมูลการลาในช่วงนี้</div>`;
-    gantt.innerHTML = h;
-    return;
-  }
-
   // person rows
   filteredPersons.forEach((person, idx) => {
-    const totalDays = person.periods.reduce((s, p) => s + p.days, 0);
+    const totalD = person.periods.reduce((s, p) => s + p.days, 0);
     const initials = (person.name.split(' ').map(w => w[0] || '').join('').slice(0, 2) || person.name[0] || '?').toUpperCase();
     const avClr = AVC[idx % AVC.length];
-
     h += `<div class="g-name-cell">
       <div class="avatar" style="background:${avClr}">${initials}</div>
       <span class="g-name-text">${person.name}</span>
-      <span class="g-leave-count">${totalDays}วัน</span>
+      <span class="g-leave-count">${totalD}d</span>
     </div>`;
-
-    dates.forEach(d => {
-      const we = d.getDay() === 0 || d.getDay() === 6;
-      const isT = d.getTime() === TODAY.getTime();
+    dates.forEach(ts => {
+      const d = new Date(ts);
+      const dow = d.getUTCDay();
+      const we = dow === 0 || dow === 6;
+      const isT = ts === TODAY;
       h += `<div class="g-row-cell${we ? ' we' : ''}${isT ? ' tday' : ''}"></div>`;
     });
   });
 
-  // workload row — count people on leave per day
+  // workload row
   const wlMap = {};
   filteredLeaves.forEach(r => {
-    for (let d = new Date(r.start); d <= r.end; d = addDays(d, 1)) {
-      const k = d.toISOString().slice(0, 10);
-      wlMap[k] = (wlMap[k] || 0) + 1;
+    for (let ts = r.start; ts <= r.end; ts = addDays(ts, 1)) {
+      wlMap[ts] = (wlMap[ts] || 0) + 1;
     }
   });
-  const maxWL = Math.max(1, ...dates.map(d => wlMap[d.toISOString().slice(0, 10)] || 0));
+  const maxWL = Math.max(1, ...dates.map(ts => wlMap[ts] || 0));
 
-  h += `<div class="g-wl-name">🔴 คนลา/วัน</div>`;
-  dates.forEach(d => {
-    const k = d.toISOString().slice(0, 10), cnt = wlMap[k] || 0;
+  h += `<div class="g-wl-name">🔴 On Leave/Day</div>`;
+  dates.forEach(ts => {
+    const cnt = wlMap[ts] || 0;
     const clr = cnt === 0 ? 'transparent' : cnt === 1 ? 'var(--green)' : cnt <= 2 ? 'var(--yellow)' : 'var(--red)';
     const bh = Math.max(cnt > 0 ? 5 : 0, (cnt / maxWL) * 28);
     h += `<div class="g-wl-cell">
@@ -474,15 +475,16 @@ function buildGantt() {
 
   gantt.innerHTML = h;
 
-  // overlay bars (after DOM)
+  // ── overlay leave bars ──
   requestAnimationFrame(() => {
     const allCells = gantt.querySelectorAll('.g-row-cell');
     const perPerson = dates.length;
 
     filteredPersons.forEach((person, pi) => {
       person.periods.forEach(r => {
-        const bs = r.start < viewStart ? viewStart : r.start;
-        const be = r.end > vend ? vend : r.end;
+        // clamp to view window
+        const bs = Math.max(r.start, viewStart);
+        const be = Math.min(r.end,   vend);
         if (bs > vend || be < viewStart) return;
 
         const si = Math.round((bs - viewStart) / 864e5);
@@ -497,11 +499,10 @@ function buildGantt() {
         bar.style.cssText = `background:${bg};color:${fg};border:1px solid ${fg};width:calc(${span * CW}px - 4px);`;
         bar.textContent = span > 3 ? r.label : span > 1 ? 'P' + (r.periodIdx + 1) : '';
 
-        // tooltip
         bar.addEventListener('mouseenter', e => {
           document.getElementById('tt-name').textContent = person.name;
           document.getElementById('tt-dates').textContent = `📅 ${r.startFmt} – ${r.endFmt}`;
-          document.getElementById('tt-days').textContent = `⏱ ${r.days} วัน`;
+          document.getElementById('tt-days').textContent = `⏱ ${r.days} day(s)`;
           document.getElementById('tt-type').innerHTML =
             `<span class="tt-badge" style="background:${bg};color:${fg}">${r.label}</span>`;
           document.getElementById('tooltip').classList.add('show');
@@ -529,48 +530,44 @@ function renderSummary() {
     p.periods.some(r => r.start <= TODAY && r.end >= TODAY)
   );
   const totalDays = filteredLeaves.reduce((s, r) => s + r.days, 0);
-  const maxPeriods = Math.max(0, ...filteredPersons.map(p => p.periods.length));
+  const maxPeriods = filteredPersons.reduce((mx, p) => Math.max(mx, p.periods.length), 0);
 
   document.getElementById('sum-strip').innerHTML = `
     <div class="scard"><div class="scard-dot" style="background:var(--orange)"></div>
       <span class="scard-val" style="color:var(--orange)">${filteredPersons.length}</span>
-      <span class="scard-lbl">พนักงาน</span></div>
+      <span class="scard-lbl">Employees</span></div>
     <div class="scard"><div class="scard-dot" style="background:var(--blue)"></div>
       <span class="scard-val" style="color:var(--blue)">${filteredLeaves.length}</span>
-      <span class="scard-lbl">รายการลา</span></div>
+      <span class="scard-lbl">Leave Records</span></div>
     <div class="scard"><div class="scard-dot" style="background:var(--green)"></div>
       <span class="scard-val" style="color:var(--green)">${totalDays}</span>
-      <span class="scard-lbl">วันลารวม</span></div>
+      <span class="scard-lbl">Total Days</span></div>
     <div class="scard"><div class="scard-dot" style="background:var(--red)"></div>
       <span class="scard-val" style="color:var(--red)">${onLeave.length}</span>
-      <span class="scard-lbl">ลาวันนี้</span></div>`;
+      <span class="scard-lbl">LeaveToday</span></div>`;
 
-  // legend: period colors
   const legendItems = [];
   for (let i = 0; i < Math.min(maxPeriods, PERIOD_COLORS.length); i++) {
-    const { fg } = PERIOD_COLORS[i];
-    legendItems.push(`<div class="leg-item"><div class="leg-dot" style="background:${fg}"></div>Period ${i + 1}</div>`);
+    legendItems.push(`<div class="leg-item"><div class="leg-dot" style="background:${PERIOD_COLORS[i].fg}"></div>Period ${i+1}</div>`);
   }
   legendItems.push(`
-    <div class="leg-item" style="margin-left:auto"><div class="leg-dot" style="background:var(--green)"></div>1 คนลา</div>
-    <div class="leg-item"><div class="leg-dot" style="background:var(--yellow)"></div>2 คน</div>
-    <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>3+ คน</div>`);
+    <div class="leg-item" style="margin-left:auto"><div class="leg-dot" style="background:var(--green)"></div>1 on leave</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--yellow)"></div>2 people</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>3+ people</div>`);
   document.getElementById('legend').innerHTML = legendItems.join('');
 }
 
 function renderPeriodLabel() {
   const vend = addDays(viewStart, viewDays - 1);
   document.getElementById('period-lbl').textContent =
-    `${fmtShort(viewStart)} – ${fmtShort(vend)} ${viewStart.getFullYear() + 543}`;
+    `${fmtShort(viewStart)} – ${fmtShort(vend)} ${new Date(viewStart).getUTCFullYear()}`;
 }
 
-// ── FILTER ────────────────────────────────────────────
 function applyFilter() {
   const q = document.getElementById('search-inp').value.toLowerCase();
   filteredPersons = persons.filter(p => !q || p.name.toLowerCase().includes(q));
-  filteredLeaves = allLeaves.filter(r => !q || r.name.toLowerCase().includes(q));
-  renderSummary();
-  buildGantt();
+  filteredLeaves  = allLeaves.filter(r => !q || r.name.toLowerCase().includes(q));
+  renderSummary(); buildGantt();
 }
 
 // ── LOAD ─────────────────────────────────────────────
@@ -582,32 +579,24 @@ async function loadData() {
   try {
     const table = await fetchSheet(cfg.sheetId, cfg.sheetName || 'period');
     const parsed = parsePeriodSheet(table);
-    persons = parsed.persons;
+    persons   = parsed.persons;
     allLeaves = parsed.leaves;
 
-    if (persons.length === 0) {
-      document.getElementById('err-area').innerHTML =
-        `<div class="info-box">ℹ️ ไม่พบข้อมูลใน Sheet "<b>${cfg.sheetName || 'period'}</b>" หรือยังไม่มีวันที่ใส่ไว้<br/>
-        ตรวจสอบว่าคอลัมน์ B = ชื่อ, C = วันเริ่ม, D = วันสิ้นสุด และรูปแบบวันที่เป็น DD-MM-YYYY</div>`;
-    }
-
     filteredPersons = [...persons];
-    filteredLeaves = [...allLeaves];
+    filteredLeaves  = [...allLeaves];
 
-    // always start view from today
-    viewStart = d0(new Date());
+    // reset view to today
+    viewStart = TODAY;
 
-    renderSummary();
-    renderPeriodLabel();
-    buildGantt();
-    document.getElementById('lupd').textContent = 'อัปเดต ' + new Date().toLocaleTimeString('th-TH');
+    renderSummary(); renderPeriodLabel(); buildGantt();
+    document.getElementById('lupd').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB');
   } catch (err) {
-    let msg = err.message || 'โหลดไม่สำเร็จ';
+    let msg = err.message || 'Failed to load';
     let hint = '';
-    if (/401|403|PERMISSION/i.test(msg)) hint = '<br/>⚠️ Sheet ต้องแชร์เป็น <b>Anyone with the link → Viewer</b>';
-    else if (/404|not found/i.test(msg)) hint = '<br/>⚠️ ไม่พบ Sheet นี้ ตรวจสอบ Spreadsheet ID';
+    if (/401|403|PERMISSION/i.test(msg)) hint = '<br/>⚠️ Make sure the Sheet is shared as <b>Anyone with the link → Viewer</b>';
+    else if (/404|not found/i.test(msg)) hint = '<br/>⚠️ Sheet not found. Please check the Spreadsheet ID';
     document.getElementById('err-area').innerHTML =
-      `<div class="err">❌ ${msg}${hint}<br/><br/>💡 คลิก ⚙️ เพื่อตั้งค่า Sheet ID และชื่อ Tab</div>`;
+      `<div class="err">❌ ${msg}${hint}<br/><br/>💡 Click ⚙️ to configure Sheet ID and Tab name</div>`;
     persons = []; allLeaves = []; filteredPersons = []; filteredLeaves = [];
     renderSummary(); buildGantt();
   } finally {
@@ -627,22 +616,22 @@ document.getElementById('next-btn').addEventListener('click', () => {
   viewStart = addDays(viewStart, viewDays); renderPeriodLabel(); buildGantt();
 });
 document.getElementById('today-btn').addEventListener('click', () => {
-  viewStart = d0(new Date()); renderPeriodLabel(); buildGantt();
+  viewStart = TODAY; renderPeriodLabel(); buildGantt();
 });
 document.getElementById('ref-btn').addEventListener('click', loadData);
 document.getElementById('search-inp').addEventListener('input', applyFilter);
 
 document.getElementById('cfg-btn').addEventListener('click', () => {
   const c = loadCfg();
-  document.getElementById('c-id').value = c.sheetId || '';
-  document.getElementById('c-tab').value = c.sheetName || 'period';
+  document.getElementById('c-id').value  = c.sheetId    || '';
+  document.getElementById('c-tab').value = c.sheetName  || 'period';
   document.getElementById('modal-bg').classList.add('open');
 });
 document.getElementById('m-cancel').addEventListener('click', () =>
   document.getElementById('modal-bg').classList.remove('open'));
 document.getElementById('m-save').addEventListener('click', () => {
   saveCfg({
-    sheetId: document.getElementById('c-id').value.trim(),
+    sheetId:   document.getElementById('c-id').value.trim(),
     sheetName: document.getElementById('c-tab').value.trim() || 'period',
   });
   document.getElementById('modal-bg').classList.remove('open');
