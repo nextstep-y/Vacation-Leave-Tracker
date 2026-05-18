@@ -349,10 +349,9 @@ function parsePeriodSheet(table) {
       if (pIdx >= 10) break;
     }
 
-    if (periods.length > 0) {
-      result.push({ name, periods });
-      periods.forEach(p => allLeaves.push({ name, ...p }));
-    }
+    // always add person even if no leave dates yet
+    result.push({ name, periods });
+    periods.forEach(p => allLeaves.push({ name, ...p }));
   }
 
   return { persons: result, leaves: allLeaves };
@@ -566,14 +565,8 @@ async function loadData() {
     filteredPersons = [...persons];
     filteredLeaves = [...allLeaves];
 
-    // auto-set view to cover all leave dates
-    if (allLeaves.length > 0) {
-      const starts = allLeaves.map(r => r.start).filter(Boolean);
-      const minDate = starts.reduce((a, b) => a < b ? a : b, starts[0]);
-      // center today if today is within range, else jump to first leave
-      if (TODAY >= minDate) viewStart = d0(TODAY);
-      else viewStart = d0(minDate);
-    }
+    // always start view from today
+    viewStart = d0(new Date());
 
     renderSummary();
     renderPeriodLabel();
