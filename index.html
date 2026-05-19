@@ -323,65 +323,89 @@ async function fetchSheet(sheetId, sheetName) {
 }
 
 // ── PARSE ─────────────────────────────────────────────
+// Sheet "period" layout:
+//   Col A (idx 0): No.
+//   Col B (idx 1): Employee Name
+//   Col C (idx 2): Period 1 Start  (DD-MM-YYYY string)
+//   Col D (idx 3): Period 1 End
+//   Col E (idx 4): Period 2 Start  (optional)
+//   Col F (idx 5): Period 2 End    (optional)
+//   ...
 function parsePeriodSheet(table) {
   const rows = table.rows || [];
   const cols = table.cols || [];
   const result = [], allLeaves = [];
 
-  console.log('[PERIOD] cols:', cols.map((c,i)=>`[${i}]"${c.label}"(${c.type})`).join(', '));
+  // Log raw structure for debugging
+  console.log('[PERIOD] cols count:', cols.length,
+    '| types:', cols.map((c,i)=>`[${i}]${c.label||''}(${c.type})`).join(' '));
+  console.log('[PERIOD] data rows:', rows.length);
 
+  // Robustly extract best string from a gviz cell
   function cellStr(cells, i) {
-    if (i >= cells.length || !cells[i]) return '';
+    if (!cells || i >= cells.length || !cells[i]) return '';
     const c = cells[i];
-    // For date-type columns: v="Date(y,m,d)", f="3/7/2026" or "03-07-2026"
-    // For string-type columns: v="03-07-2026", f=null
-    // Try: v first (for Date() literal), then f (for formatted date string), then v as string
-    const vRaw = c.v != null ? String(c.v).trim() : '';
-    const fRaw = c.f != null ? String(c.f).trim() : '';
-    // If v looks like a Date() literal, prefer it
-    if (vRaw.startsWith('Date(')) return vRaw;
-    // Otherwise prefer f (formatted), fallback to v
-    return fRaw || vRaw;
+    const v = c.v != null ? String(c.v).trim() : '';
+    const f = c.f != null ? String(c.f).trim() : '';
+    // Date(y,m,d) literal → keep as-is for parseDate
+    if (v.startsWith('Date(')) return v;
+    // Prefer formatted string (e.g. "03-07-2026") over raw
+    return f || v;
   }
 
-  const SKIP = /^(no\.?|no|employee.*name|period\s*\d|start|end|name|Employees|Name|day)$/i;
+  // Words that indicate a header or non-data row in col B
+  const SKIP = /^(no\.?|employee.*|period.*|start|end|name|chief|engineers?|surveyors?)$/i;
 
   for (let ri = 0; ri < rows.length; ri++) {
     const cells = rows[ri].c || [];
+
+    // Col B = index 1 = name
     const name = cellStr(cells, 1);
     if (!name) continue;
-    if (/^\d+$/.test(name)) continue;
+    if (/^\d+$/.test(name)) continue;   // pure number → row number, skip
     if (SKIP.test(name.trim())) continue;
 
     const periods = [];
+
+    // Scan pairs: (C,D)=idx(2,3), (E,F)=idx(4,5), ...
+    // Stop as soon as both cells in a pair are empty
     for (let pIdx = 0; pIdx < 10; pIdx++) {
-      const sc = 2 + pIdx * 2;
-      const ec = 3 + pIdx * 2;
-      if (sc >= cells.length) break;
+      const si = 2 + pIdx * 2;   // start col index
+      const ei = 3 + pIdx * 2;   // end col index
 
-      const sv = cellStr(cells, sc);
-      const ev = cellStr(cells, ec);
+      // If both columns don't exist in this row → no more periods
+      const startStr = cellStr(cells, si);
+      const endStr   = cellStr(cells, ei);
 
-      console.log(`[PERIOD] row${ri} "${name}" P${pIdx+1}: start="${sv}" end="${ev}"`);
+      console.log(`[PERIOD] row${ri} "${name}" P${pIdx+1}: ` +
+        `start="${startStr}" end="${endStr}"`);
 
-      const sd = parseDate(sv);
-      const ed = parseDate(ev) != null ? parseDate(ev) : sd;
+      if (!startStr && !endStr) break;  // no more data for this person
+
+      const sd = parseDate(startStr);
+      const ed = parseDate(endStr) ?? sd;
 
       if (sd != null) {
         const days = diffDays(sd, ed);
-        periods.push({ start: sd, end: ed, days,
-          label: `Period ${pIdx+1}`, periodIdx: pIdx,
-          startFmt: fmtTH(sd), endFmt: fmtTH(ed) });
+        periods.push({
+          start: sd, end: ed, days,
+          label: `Period ${pIdx + 1}`,
+          periodIdx: pIdx,
+          startFmt: fmtTH(sd),
+          endFmt:   fmtTH(ed),
+        });
         console.log(`  ✓ ${fmtTH(sd)} – ${fmtTH(ed)} = ${days}d`);
       } else {
-        if (!sv && !ev) break;
+        console.log(`  ✗ could not parse date`);
       }
     }
 
     result.push({ name, periods });
     periods.forEach(p => allLeaves.push({ name, ...p }));
-    console.log(`[PERIOD] "${name}" => ${periods.length} period(s)`);
+    console.log(`[PERIOD] "${name}" → ${periods.length} period(s), ` +
+      `total ${periods.reduce((s,p)=>s+p.days,0)}d`);
   }
+
   return { persons: result, leaves: allLeaves };
 }
 
