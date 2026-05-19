@@ -168,9 +168,7 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
   <div class="ctrl-group">
     <label>Period</label>
     <div style="display:flex;align-items:center;gap:6px">
-      <button class="nav-btn" id="prev-btn">‹</button>
       <span class="period-label" id="period-lbl"></span>
-      <button class="nav-btn" id="next-btn">›</button>
       <button class="today-btn" id="today-btn">Today</button>
     </div>
   </div>
@@ -179,7 +177,7 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
     <select id="zoom-sel">
       <option value="30">Monthly (30 days)</option>
       <option value="60">2 Months</option>
-      <option value="90">3 Months</option>
+      <option value="90" selected>3 Months</option>
       <option value="180">6 Months</option>
       <option value="365">Yearly</option>
     </select>
@@ -451,8 +449,8 @@ function parsePeriodRows(rows) {
 
 // ── STATE ─────────────────────────────────────────────
 let persons = [], allLeaves = [], filteredPersons = [], filteredLeaves = [];
-let viewStart = TODAY, viewDays = 30;
-const NAV_STEP_DAYS = 1;
+let viewStart = addDays(TODAY, -30), viewDays = 90;
+let scrollLabelRaf = 0;
 
 // ── GANTT ──────────────────────────────────────────────
 const NW = 180, CW = 30;
@@ -542,6 +540,8 @@ function buildGantt() {
 
   // ── overlay leave bars ──
   requestAnimationFrame(() => {
+    renderPeriodLabel();
+
     const allCells = gantt.querySelectorAll('.g-row-cell');
     const perPerson = dates.length;
 
@@ -579,6 +579,14 @@ function buildGantt() {
       });
     });
   });
+}
+
+function scrollToDate(ts, behavior = 'smooth') {
+  const wrap = document.getElementById('gantt-wrap');
+  const idx = Math.max(0, Math.min(viewDays - 1, Math.round((ts - viewStart) / 864e5)));
+  const centeredLeft = idx * CW - Math.max(0, (wrap.clientWidth - NW - CW) / 2);
+  wrap.scrollTo({ left: Math.max(0, centeredLeft), behavior });
+  requestAnimationFrame(renderPeriodLabel);
 }
 
 function moveTT(e) {
@@ -623,9 +631,14 @@ function renderSummary() {
 }
 
 function renderPeriodLabel() {
-  const vend = addDays(viewStart, viewDays - 1);
+  const wrap = document.getElementById('gantt-wrap');
+  const visibleCols = Math.max(1, Math.floor((wrap.clientWidth - NW) / CW));
+  const startIdx = Math.max(0, Math.min(viewDays - 1, Math.floor(wrap.scrollLeft / CW)));
+  const endIdx = Math.max(startIdx, Math.min(viewDays - 1, startIdx + visibleCols - 1));
+  const vstart = addDays(viewStart, startIdx);
+  const vend = addDays(viewStart, endIdx);
   document.getElementById('period-lbl').textContent =
-    `${fmtShort(viewStart)} – ${fmtShort(vend)} ${new Date(viewStart).getUTCFullYear()}`;
+    `${fmtShort(vstart)} – ${fmtShort(vend)} ${new Date(vstart).getUTCFullYear()}`;
 }
 
 function applyFilter() {
@@ -650,10 +663,11 @@ async function loadData() {
     filteredPersons = [...persons];
     filteredLeaves  = [...allLeaves];
 
-    // reset view to today
-    viewStart = TODAY;
+    // Keep enough days on both sides so the timeline can be browsed with horizontal scroll.
+    viewStart = addDays(TODAY, -30);
 
-    renderSummary(); renderPeriodLabel(); buildGantt();
+    renderSummary(); buildGantt();
+    requestAnimationFrame(() => scrollToDate(TODAY, 'auto'));
     document.getElementById('lupd').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB');
   } catch (err) {
     let msg = err.message || 'Failed to load';
@@ -672,16 +686,20 @@ async function loadData() {
 
 // ── EVENTS ────────────────────────────────────────────
 document.getElementById('zoom-sel').addEventListener('change', e => {
-  viewDays = +e.target.value; renderPeriodLabel(); buildGantt();
-});
-document.getElementById('prev-btn').addEventListener('click', () => {
-  viewStart = addDays(viewStart, -NAV_STEP_DAYS); renderPeriodLabel(); buildGantt();
-});
-document.getElementById('next-btn').addEventListener('click', () => {
-  viewStart = addDays(viewStart, NAV_STEP_DAYS); renderPeriodLabel(); buildGantt();
+  viewDays = +e.target.value;
+  viewStart = addDays(TODAY, -30);
+  buildGantt();
+  requestAnimationFrame(() => scrollToDate(TODAY, 'auto'));
 });
 document.getElementById('today-btn').addEventListener('click', () => {
-  viewStart = TODAY; renderPeriodLabel(); buildGantt();
+  scrollToDate(TODAY);
+});
+document.getElementById('gantt-wrap').addEventListener('scroll', () => {
+  if (scrollLabelRaf) return;
+  scrollLabelRaf = requestAnimationFrame(() => {
+    scrollLabelRaf = 0;
+    renderPeriodLabel();
+  });
 });
 document.getElementById('ref-btn').addEventListener('click', loadData);
 document.getElementById('search-inp').addEventListener('input', applyFilter);
