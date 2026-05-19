@@ -232,11 +232,8 @@ const loadCfg = () => { try { return { ...DEF, ...JSON.parse(localStorage.getIte
 const saveCfg = c => localStorage.setItem(SK, JSON.stringify(c));
 
 // ── DATE UTILS (all UTC-midnight to avoid timezone drift) ──
-// Store dates as UTC midnight timestamps
-function utcDay(y, m, d) {
-  // m = 1-based month
-  return Date.UTC(y, m - 1, d);
-}
+function utcDay(y, m, d) { return Date.UTC(y, m - 1, d); }  // m = 1-based
+
 function parseDate(v) {
   if (v === null || v === undefined) return null;
   const s = String(v).trim();
@@ -244,29 +241,41 @@ function parseDate(v) {
 
   let m;
 
-  // gviz: Date(2026,6,3) — month is 0-based
-  m = s.match(/Date\((\d+),(\d+),(\d+)\)/);
-  if (m) return utcDay(+m[1], +m[2] + 1, +m[3]);
+  // 1) gviz Date literal: Date(2026,6,3) — month is 0-BASED → add 1
+  m = s.match(/^Date\((\d+),(\d+),(\d+)\)$/);
+  if (m) {
+    const y = +m[1], mo0 = +m[2], d = +m[3];
+    return utcDay(y, mo0 + 1, d);  // mo0+1 converts to 1-based
+  }
 
-  // DD-MM-YYYY or DD/MM/YYYY (Thai convention, day first)
-  m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
+  // 2) DD-MM-YYYY (dash separator, Thai convention — always try this first)
+  m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
   if (m) {
     const dd = +m[1], mm = +m[2], yy = +m[3];
-    if (dd >= 1 && dd <= 31 && mm >= 1 && mm <= 12 && yy > 1900)
+    if (dd >= 1 && dd <= 31 && mm >= 1 && mm <= 12 && yy > 2000)
       return utcDay(yy, mm, dd);
   }
 
-  // YYYY-MM-DD
+  // 3) YYYY-MM-DD (ISO)
   m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (m) return utcDay(+m[1], +m[2], +m[3]);
 
-  // M/D/YYYY (US format, but only if day>12 to distinguish from DD/MM)
+  // 4) DD/MM/YYYY (slash, Thai convention — day first)
+  //    Only use this if first number > 12 (unambiguous day)
+  //    OR second number > 12 (unambiguous month... wait that's invalid)
+  //    Safest: only trust if we can confirm it's DD/MM by day>12
   m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (m) {
     const a = +m[1], b = +m[2], yy = +m[3];
-    // if a <= 12 and b <= 12 it's ambiguous — assume DD/MM (Thai)
-    if (a >= 1 && a <= 31 && b >= 1 && b <= 12)
-      return utcDay(yy, b, a);   // DD/MM
+    // If a > 12: must be day → a=DD, b=MM
+    if (a > 12 && b >= 1 && b <= 12 && yy > 2000)
+      return utcDay(yy, b, a);
+    // If b > 12: must be day → M/D/YYYY US format
+    if (b > 12 && a >= 1 && a <= 12 && yy > 2000)
+      return utcDay(yy, a, b);
+    // Both <= 12: ambiguous — assume Thai DD/MM (day first)
+    if (a >= 1 && b >= 1 && b <= 12 && yy > 2000)
+      return utcDay(yy, b, a);
   }
 
   return null;
@@ -341,16 +350,23 @@ function parsePeriodSheet(table) {
     '| types:', cols.map((c,i)=>`[${i}]${c.label||''}(${c.type})`).join(' '));
   console.log('[PERIOD] data rows:', rows.length);
 
-  // Robustly extract best string from a gviz cell
+  // Extract best parseable value from a gviz cell
+  // Priority: Date(y,m,d) literal in v > string v > formatted f
+  // NEVER prefer f over v — f may be US-format "7/3/2026" which is ambiguous
   function cellStr(cells, i) {
     if (!cells || i >= cells.length || !cells[i]) return '';
     const c = cells[i];
     const v = c.v != null ? String(c.v).trim() : '';
     const f = c.f != null ? String(c.f).trim() : '';
-    // Date(y,m,d) literal → keep as-is for parseDate
+    // If v has a Date() literal — best possible value, use it
     if (v.startsWith('Date(')) return v;
-    // Prefer formatted string (e.g. "03-07-2026") over raw
-    return f || v;
+    // If v is a recognizable date string — use it
+    if (/^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/.test(v)) return v;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+    // f might be "7/3/2026" US format — only use as last resort
+    // and only if v is empty
+    if (!v && f) return f;
+    return v;
   }
 
   // Words that indicate a header or non-data row in col B
