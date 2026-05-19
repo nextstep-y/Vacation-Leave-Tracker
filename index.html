@@ -320,15 +320,57 @@ const PERIOD_COLORS = [
 const AVC = ['#F97316','#3B82F6','#22C55E','#A855F7','#EAB308','#EC4899','#14B8A6','#F43F5E'];
 
 // ── FETCH ─────────────────────────────────────────────
-async function fetchSheet(sheetId, sheetName) {
+async function fetchSheetCsv(sheetId, sheetName) {
   const sp = sheetName ? '&sheet=' + encodeURIComponent(sheetName) : '';
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&headers=1${sp}`;
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&headers=0${sp}&_=${Date.now()}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const txt = await res.text();
-  const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
-  if (json.status === 'error') throw new Error(json.errors?.[0]?.detailed_message || 'Sheet error');
-  return json.table;
+  if (/google\.visualization\.Query\.setResponse/i.test(txt)) {
+    const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+    throw new Error(json.errors?.[0]?.detailed_message || 'Sheet error');
+  }
+  return parseCsv(txt);
+}
+
+function parseCsv(txt) {
+  const rows = [];
+  let row = [], cell = '', inQuote = false;
+
+  for (let i = 0; i < txt.length; i++) {
+    const ch = txt[i];
+    const nx = txt[i + 1];
+
+    if (inQuote) {
+      if (ch === '"' && nx === '"') {
+        cell += '"';
+        i++;
+      } else if (ch === '"') {
+        inQuote = false;
+      } else {
+        cell += ch;
+      }
+    } else if (ch === '"') {
+      inQuote = true;
+    } else if (ch === ',') {
+      row.push(cell.trim());
+      cell = '';
+    } else if (ch === '\n') {
+      row.push(cell.trim());
+      rows.push(row);
+      row = [];
+      cell = '';
+    } else if (ch !== '\r') {
+      cell += ch;
+    }
+  }
+
+  if (cell || row.length) {
+    row.push(cell.trim());
+    rows.push(row);
+  }
+
+  return rows;
 }
 
 // ── PARSE ─────────────────────────────────────────────
@@ -340,77 +382,59 @@ async function fetchSheet(sheetId, sheetName) {
 //   Col E (idx 4): Period 2 Start  (optional)
 //   Col F (idx 5): Period 2 End    (optional)
 //   ...
-function parsePeriodSheet(table) {
-  const rows = table.rows || [];
-  const cols = table.cols || [];
+function parsePeriodRows(rows) {
   const result = [], allLeaves = [];
 
-  // Log raw structure for debugging
-  console.log('[PERIOD] cols count:', cols.length,
-    '| types:', cols.map((c,i)=>`[${i}]${c.label||''}(${c.type})`).join(' '));
-  console.log('[PERIOD] data rows:', rows.length);
+  console.log('[PERIOD] csv rows:', rows.length);
 
-  // Extract best parseable value from a gviz cell
-  // Priority: Date(y,m,d) literal in v > string v > formatted f
-  // NEVER prefer f over v — f may be US-format "7/3/2026" which is ambiguous
-  function cellStr(cells, i) {
-    if (!cells || i >= cells.length || !cells[i]) return '';
-    const c = cells[i];
-    const v = c.v != null ? String(c.v).trim() : '';
-    const f = c.f != null ? String(c.f).trim() : '';
-    // If v has a Date() literal — best possible value, use it
-    if (v.startsWith('Date(')) return v;
-    // If v is a recognizable date string — use it
-    if (/^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/.test(v)) return v;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
-    // f might be "7/3/2026" US format — only use as last resort
-    // and only if v is empty
-    if (!v && f) return f;
-    return v;
+  function cellStr(row, i) {
+    return row && row[i] != null ? String(row[i]).trim() : '';
   }
 
   // Words that indicate a header or non-data row in col B
   const SKIP = /^(no\.?|employee.*|period.*|start|end|name|chief|engineers?|surveyors?)$/i;
 
   for (let ri = 0; ri < rows.length; ri++) {
-    const cells = rows[ri].c || [];
+    const row = rows[ri] || [];
 
     // Col B = index 1 = name
-    const name = cellStr(cells, 1);
+    const name = cellStr(row, 1);
     if (!name) continue;
     if (/^\d+$/.test(name)) continue;   // pure number → row number, skip
     if (SKIP.test(name.trim())) continue;
 
     const periods = [];
+    const maxPairs = Math.max(0, Math.ceil((row.length - 2) / 2));
 
     // Scan pairs: (C,D)=idx(2,3), (E,F)=idx(4,5), ...
-    // Stop as soon as both cells in a pair are empty
-    for (let pIdx = 0; pIdx < 10; pIdx++) {
+    // Keep scanning all available pairs so a blank earlier period cannot hide later data.
+    for (let pIdx = 0; pIdx < maxPairs; pIdx++) {
       const si = 2 + pIdx * 2;   // start col index
       const ei = 3 + pIdx * 2;   // end col index
 
-      // If both columns don't exist in this row → no more periods
-      const startStr = cellStr(cells, si);
-      const endStr   = cellStr(cells, ei);
+      const startStr = cellStr(row, si);
+      const endStr   = cellStr(row, ei);
 
       console.log(`[PERIOD] row${ri} "${name}" P${pIdx+1}: ` +
         `start="${startStr}" end="${endStr}"`);
 
-      if (!startStr && !endStr) break;  // no more data for this person
+      if (!startStr && !endStr) continue;
 
-      const sd = parseDate(startStr);
-      const ed = parseDate(endStr) ?? sd;
+      const sd = parseDate(startStr || endStr);
+      const edRaw = parseDate(endStr || startStr);
+      const ed = edRaw ?? sd;
 
       if (sd != null) {
-        const days = diffDays(sd, ed);
+        const start = Math.min(sd, ed);
+        const end = Math.max(sd, ed);
         periods.push({
-          start: sd, end: ed, days,
+          start, end, days: diffDays(start, end),
           label: `Period ${pIdx + 1}`,
           periodIdx: pIdx,
-          startFmt: fmtTH(sd),
-          endFmt:   fmtTH(ed),
+          startFmt: fmtTH(start),
+          endFmt:   fmtTH(end),
         });
-        console.log(`  ✓ ${fmtTH(sd)} – ${fmtTH(ed)} = ${days}d`);
+        console.log(`  ✓ ${fmtTH(start)} – ${fmtTH(end)} = ${diffDays(start, end)}d`);
       } else {
         console.log(`  ✗ could not parse date`);
       }
@@ -617,8 +641,8 @@ async function loadData() {
   document.getElementById('err-area').innerHTML = '';
   const cfg = loadCfg();
   try {
-    const table = await fetchSheet(cfg.sheetId, cfg.sheetName || 'period');
-    const parsed = parsePeriodSheet(table);
+    const rows = await fetchSheetCsv(cfg.sheetId, cfg.sheetName || 'period');
+    const parsed = parsePeriodRows(rows);
     persons   = parsed.persons;
     allLeaves = parsed.leaves;
 
