@@ -452,6 +452,7 @@ function parsePeriodRows(rows) {
 // ── STATE ─────────────────────────────────────────────
 let persons = [], allLeaves = [], filteredPersons = [], filteredLeaves = [];
 let viewStart = TODAY, viewDays = 30;
+const NAV_STEP_DAYS = 1;
 
 // ── GANTT ──────────────────────────────────────────────
 const NW = 180, CW = 30;
@@ -674,10 +675,10 @@ document.getElementById('zoom-sel').addEventListener('change', e => {
   viewDays = +e.target.value; renderPeriodLabel(); buildGantt();
 });
 document.getElementById('prev-btn').addEventListener('click', () => {
-  viewStart = addDays(viewStart, -viewDays); renderPeriodLabel(); buildGantt();
+  viewStart = addDays(viewStart, -NAV_STEP_DAYS); renderPeriodLabel(); buildGantt();
 });
 document.getElementById('next-btn').addEventListener('click', () => {
-  viewStart = addDays(viewStart, viewDays); renderPeriodLabel(); buildGantt();
+  viewStart = addDays(viewStart, NAV_STEP_DAYS); renderPeriodLabel(); buildGantt();
 });
 document.getElementById('today-btn').addEventListener('click', () => {
   viewStart = TODAY; renderPeriodLabel(); buildGantt();
