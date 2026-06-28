@@ -266,6 +266,16 @@ function parseDate(v) {
       return utcDay(yy, b, a);
   }
 
+  // 5) DD-MMM-YYYY / DD MMM YYYY / DD-MMMM-YYYY, e.g. 08-Aug-2026
+  m = s.match(/^(\d{1,2})[-\s]([A-Za-z]{3,9})[-\s](\d{2}|\d{4})$/);
+  if (m) {
+    const dd = +m[1];
+    const mm = MONTH_NAMES[m[2].toLowerCase()];
+    const yy = +m[3] < 100 ? 2000 + +m[3] : +m[3];
+    if (dd >= 1 && dd <= 31 && mm && yy > 2000)
+      return utcDay(yy, mm, dd);
+  }
+
   return null;
 }
 
@@ -290,6 +300,20 @@ function fmtShort(ts) {
 
 const DAY_TH = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MON_TH = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_NAMES = {
+  jan: 1, january: 1,
+  feb: 2, february: 2,
+  mar: 3, march: 3,
+  apr: 4, april: 4,
+  may: 5,
+  jun: 6, june: 6,
+  jul: 7, july: 7,
+  aug: 8, august: 8,
+  sep: 9, sept: 9, september: 9,
+  oct: 10, october: 10,
+  nov: 11, november: 11,
+  dec: 12, december: 12,
+};
 
 // TODAY as UTC midnight
 const _now = new Date();
