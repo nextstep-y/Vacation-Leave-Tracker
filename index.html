@@ -197,6 +197,11 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
       <input id="c-tab" placeholder="period"/>
       <p class="hint">Name tab with columns: Name,, Start date, End date</p>
     </div>
+    <div class="mrow">
+      <label>Data Sheet GID</label>
+      <input id="c-gid" inputmode="numeric" placeholder="1204694744"/>
+      <p class="hint">The number after <b>gid=</b> when the period tab is open</p>
+    </div>
     <p style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6">
       <b style="color:var(--text)">Expected Sheet "period" structure:</b><br/>
       Col A = No. | B = Employee Name | C = Start date P1 | D = End date P1 | E = Start date P2 | F = End date P2 | …<br/>
@@ -214,7 +219,8 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
 const SK = 'itd_period_cfg';
 const DEF = {
   sheetId: '1d8g6KbrMxCvBMOkxJpQaUxTJcVO6aLL_4eS1IahVTQc',
-  sheetName: 'period'
+  sheetName: 'period',
+  sheetGid: '1204694744'
 };
 const loadCfg = () => { try { return { ...DEF, ...JSON.parse(localStorage.getItem(SK) || '{}') }; } catch { return { ...DEF }; } };
 const saveCfg = c => localStorage.setItem(SK, JSON.stringify(c));
@@ -332,10 +338,20 @@ const PERIOD_COLORS = [
 const AVC = ['#F97316','#3B82F6','#22C55E','#A855F7','#EAB308','#EC4899','#14B8A6','#F43F5E'];
 
 // ── FETCH ─────────────────────────────────────────────
-async function fetchSheetCsv(sheetId, sheetName) {
+async function fetchSheetCsv(sheetId, sheetName, sheetGid) {
+  // The gviz CSV endpoint can keep returning an old cell value after an edit,
+  // even with a cache-busting query parameter. The export endpoint is no-store
+  // and returns the current cell values, so prefer it whenever the tab GID is known.
+  if (sheetGid && /^\d+$/.test(String(sheetGid))) {
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${encodeURIComponent(sheetGid)}&_=${Date.now()}`;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return parseCsv(await res.text());
+  }
+
   const sp = sheetName ? '&sheet=' + encodeURIComponent(sheetName) : '';
   const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&headers=0${sp}&_=${Date.now()}`;
-  const res = await fetch(url);
+  const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const txt = await res.text();
   if (/google\.visualization\.Query\.setResponse/i.test(txt)) {
@@ -679,7 +695,7 @@ async function loadData() {
   document.getElementById('err-area').innerHTML = '';
   const cfg = loadCfg();
   try {
-    const rows = await fetchSheetCsv(cfg.sheetId, cfg.sheetName || 'period');
+    const rows = await fetchSheetCsv(cfg.sheetId, cfg.sheetName || 'period', cfg.sheetGid);
     const parsed = parsePeriodRows(rows);
     persons   = parsed.persons;
     allLeaves = parsed.leaves;
@@ -725,6 +741,7 @@ document.getElementById('cfg-btn').addEventListener('click', () => {
   const c = loadCfg();
   document.getElementById('c-id').value  = c.sheetId    || '';
   document.getElementById('c-tab').value = c.sheetName  || 'period';
+  document.getElementById('c-gid').value = c.sheetGid   || '';
   document.getElementById('modal-bg').classList.add('open');
 });
 document.getElementById('m-cancel').addEventListener('click', () =>
@@ -733,6 +750,7 @@ document.getElementById('m-save').addEventListener('click', () => {
   saveCfg({
     sheetId:   document.getElementById('c-id').value.trim(),
     sheetName: document.getElementById('c-tab').value.trim() || 'period',
+    sheetGid:  document.getElementById('c-gid').value.trim(),
   });
   document.getElementById('modal-bg').classList.remove('open');
   document.getElementById('loading').style.display = 'flex';
