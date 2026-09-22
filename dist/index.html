@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Leave Schedule – Survey Department</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F97316'/%3E%3Cpath d='M18 15v8M46 15v8M15 25h34v25H15z' fill='none' stroke='white' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M24 36l6 6 11-12' fill='none' stroke='white' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E'/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --orange:      #F97316;
+  --orange-lt:   #FB923C;
+  --orange-glow: rgba(249,115,22,.13);
+  --bg:          #0C0C0E;
+  --bg2:         #111113;
+  --bg3:         #181820;
+  --bg4:         #1E1E28;
+  --border:      rgba(255,255,255,.07);
+  --text:        #EDEDF0;
+  --muted:       #818198;
+  --muted2:      #505068;
+  --green:  #22C55E;
+  --blue:   #3B82F6;
+  --red:    #EF4444;
+  --yellow: #EAB308;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* HEADER */
+header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.logo{background:var(--orange);color:#fff;font-weight:700;font-size:14px;letter-spacing:1.5px;padding:4px 10px;border-radius:6px;}
+.htitle{font-size:14px;font-weight:600;}
+.hsub{font-size:11px;color:var(--muted);font-weight:300;}
+.hright{display:flex;align-items:center;gap:10px;}
+#lupd{font-size:11px;color:var(--muted2);}
+.icon-btn{background:var(--bg3);border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s;}
+.icon-btn:hover{color:var(--orange);border-color:var(--orange);}
+.refresh-btn{background:var(--orange);color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:'Prompt',sans-serif;font-size:12px;font-weight:500;display:flex;align-items:center;gap:5px;}
+.refresh-btn:hover{background:var(--orange-lt);}
+.refresh-btn svg{width:13px;height:13px;}
+.refresh-btn.spin svg{animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px;}
+.ring{width:48px;height:48px;border:4px solid var(--bg4);border-top-color:var(--orange);border-radius:50%;animation:spin .9s linear infinite;}
+#loading p{color:var(--muted);font-size:13px;}
+
+/* CONTROLS */
+.controls{padding:12px 20px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;}
+.ctrl-group{display:flex;flex-direction:column;gap:4px;}
+.ctrl-group label{font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.5px;}
+.ctrl-group select,.ctrl-group input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:7px;font-family:'Prompt',sans-serif;font-size:12px;outline:none;height:32px;}
+.ctrl-group select:focus,.ctrl-group input:focus{border-color:var(--orange);}
+.nav-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);width:32px;height:32px;border-radius:7px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.nav-btn:hover{background:var(--orange);border-color:var(--orange);color:#fff;}
+.period-label{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;min-width:180px;text-align:center;}
+.today-btn{background:transparent;border:1px solid var(--orange);color:var(--orange);padding:0 12px;border-radius:7px;cursor:pointer;font-family:'Prompt',sans-serif;font-size:12px;height:32px;transition:all .15s;}
+.today-btn:hover{background:var(--orange);color:#fff;}
+.view-switch{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:2px;gap:2px;}
+.view-btn{border:0;background:transparent;color:var(--muted);height:28px;padding:0 12px;border-radius:6px;cursor:pointer;font-family:'Prompt',sans-serif;font-size:12px;white-space:nowrap;}
+.view-btn.active{background:var(--orange);color:#fff;font-weight:600;}
+
+/* SUMMARY */
+.summary-strip{display:flex;gap:20px;padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg2);flex-wrap:wrap;}
+.scard{display:flex;align-items:center;gap:8px;}
+.scard-dot{width:8px;height:8px;border-radius:50%;}
+.scard-val{font-size:16px;font-weight:700;}
+.scard-lbl{font-size:11px;color:var(--muted);}
+
+/* LEGEND */
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:8px 20px;border-bottom:1px solid var(--border);background:var(--bg2);}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.leg-dot{width:10px;height:10px;border-radius:3px;}
+
+/* ERROR / INFO */
+.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:12px 18px;color:var(--red);font-size:12px;margin:14px 20px;}
+.info-box{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:10px 18px;color:var(--blue);font-size:12px;margin:10px 20px;}
+
+/* GANTT */
+#gantt-wrap{overflow:auto;-webkit-overflow-scrolling:touch;}
+#gantt{display:inline-grid;min-width:100%;}
+
+/* month row */
+.g-month-corner{position:sticky;left:0;z-index:31;background:var(--bg4);border-right:1px solid var(--border);border-bottom:1px solid var(--border);height:24px;}
+.g-month-cell{height:24px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--muted);background:var(--bg4);letter-spacing:.3px;text-transform:uppercase;white-space:nowrap;overflow:hidden;}
+
+/* date header */
+.g-corner{position:sticky;left:0;z-index:30;background:var(--bg3);border-right:1px solid var(--border);border-bottom:2px solid rgba(249,115,22,.3);padding:0 14px;height:46px;display:flex;align-items:center;font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.g-date-cell{height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid var(--border);border-bottom:2px solid rgba(249,115,22,.3);font-size:10px;color:var(--muted2);background:var(--bg3);user-select:none;}
+.g-date-cell.we{background:var(--bg4);}
+.g-date-cell.tday{background:var(--orange-glow);}
+.d-num{font-size:12px;font-weight:600;color:var(--muted);line-height:1;}
+.g-date-cell.tday .d-num{color:var(--orange);}
+.d-day{font-size:9px;color:var(--muted2);margin-top:1px;}
+
+/* person rows */
+.g-name-cell{position:sticky;left:0;z-index:20;background:var(--bg2);border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:0 12px;height:42px;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+.avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+.g-name-text{font-size:12px;font-weight:500;color:var(--text);}
+.g-leave-count{font-size:10px;color:var(--muted);margin-left:auto;padding-right:2px;}
+.g-row-cell{height:42px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);position:relative;}
+.g-row-cell.we{background:var(--bg3);}
+.g-row-cell.tday{background:var(--orange-glow);}
+
+/* leave bar */
+.leave-bar{position:absolute;top:7px;bottom:7px;left:2px;border-radius:5px;display:flex;align-items:center;padding:0 7px;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;cursor:default;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.4);transition:filter .12s;}
+.leave-bar:hover{filter:brightness(1.2);z-index:10;}
+.cycle-bar{background:rgba(59,130,246,.16);color:#93C5FD;border:1px solid rgba(59,130,246,.75);overflow:visible;}
+.cycle-target{position:absolute;top:-5px;bottom:-5px;width:2px;background:#fff;border-radius:2px;box-shadow:0 0 0 2px rgba(59,130,246,.45);}
+.role-tag{font-size:9px;color:var(--muted);display:block;font-weight:400;line-height:1.15;}
+
+/* workload row */
+.g-wl-name{position:sticky;left:0;z-index:20;background:var(--bg4);border-right:1px solid var(--border);border-top:2px solid var(--border);padding:0 14px;height:36px;display:flex;align-items:center;font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.g-wl-cell{height:36px;border-right:1px solid var(--border);border-top:2px solid var(--border);background:var(--bg4);position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px;}
+.wl-bar{border-radius:3px 3px 0 0;width:calc(100% - 4px);display:flex;align-items:center;justify-content:center;}
+.wl-num{font-size:9px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);}
+
+/* empty row */
+.g-empty{grid-column:1/-1;padding:40px;text-align:center;color:var(--muted);font-size:13px;}
+
+/* TOOLTIP */
+#tooltip{position:fixed;z-index:500;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;pointer-events:none;opacity:0;transition:opacity .12s;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.6);max-width:240px;}
+#tooltip.show{opacity:1;}
+.tt-name{font-weight:600;color:var(--text);margin-bottom:4px;font-size:13px;}
+.tt-row{color:var(--muted);font-size:11px;line-height:1.9;}
+.tt-badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:10px;font-weight:600;margin-top:5px;}
+
+/* CONFIG MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:300;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:24px;width:90%;max-width:420px;}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:16px;}
+.mrow{margin-bottom:12px;}
+.mrow label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;}
+.mrow input{width:100%;background:var(--bg4);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;font-family:'Prompt',sans-serif;font-size:12px;outline:none;}
+.mrow input:focus{border-color:var(--orange);}
+.hint{font-size:10px;color:var(--muted2);margin-top:3px;}
+.mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+.btn-p{background:var(--orange);color:#fff;border:none;padding:8px 20px;border-radius:7px;cursor:pointer;font-family:'Prompt',sans-serif;font-size:12px;font-weight:500;}
+.btn-s{background:var(--bg4);color:var(--text);border:1px solid var(--border);padding:8px 16px;border-radius:7px;cursor:pointer;font-family:'Prompt',sans-serif;font-size:12px;}
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="ring"></div><p>Loading data…</p></div>
+
+<div id="tooltip">
+  <div class="tt-name" id="tt-name"></div>
+  <div class="tt-row" id="tt-dates"></div>
+  <div class="tt-row" id="tt-days"></div>
+  <div id="tt-type"></div>
+</div>
+
+<header>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="logo">ITD</span>
+    <div><div class="htitle">Leave Schedule</div><div class="hsub">Italian-Thai Development – Survey Department</div></div>
+  </div>
+  <div class="hright">
+    <span id="lupd"></span>
+    <button class="icon-btn" id="cfg-btn" title="Settings">⚙️</button>
+    <button class="refresh-btn" id="ref-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M1 4v6h6M23 20v-6h-6"/>
+        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/>
+      </svg>Refresh
+    </button>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>View</label>
+    <div class="view-switch" role="group" aria-label="Choose schedule view">
+      <button class="view-btn active" id="view-leave" type="button">Actual Leave</button>
+      <button class="view-btn" id="view-cycle" type="button">Tenure Cycle</button>
+    </div>
+  </div>
+  <div class="ctrl-group">
+    <label>Period</label>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span class="period-label" id="period-lbl"></span>
+      <button class="today-btn" id="today-btn">Today</button>
+    </div>
+  </div>
+  <div class="ctrl-group" style="margin-left:auto">
+    <label>Search Employee</label>
+    <input type="text" id="search-inp" placeholder="Type name…" style="width:150px"/>
+  </div>
+</div>
+
+<div class="summary-strip" id="sum-strip"></div>
+<div class="legend" id="legend"></div>
+<div id="err-area"></div>
+<div id="gantt-wrap"><div id="gantt"></div></div>
+
+<!-- CONFIG MODAL -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h3>⚙️ Configure Google Sheet</h3>
+    <div class="mrow">
+      <label>Spreadsheet ID</label>
+      <input id="c-id"/>
+      <p class="hint">From URL: …/spreadsheets/d/<b style="color:var(--orange)">ID</b>/edit</p>
+    </div>
+    <div class="mrow">
+      <label>Data Sheet Name (period tab)</label>
+      <input id="c-tab" placeholder="period"/>
+      <p class="hint">Name tab with columns: Name,, Start date, End date</p>
+    </div>
+    <div class="mrow">
+      <label>Data Sheet GID</label>
+      <input id="c-gid" inputmode="numeric" placeholder="1204694744"/>
+      <p class="hint">The number after <b>gid=</b> when the period tab is open</p>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6">
+      <b style="color:var(--text)">Expected Sheet "period" structure:</b><br/>
+      Col A = No. | B = Employee Name | C = Start date P1 | D = End date P1 | E = Start date P2 | F = End date P2 | …<br/>
+      Date format: <b>DD-MM-YYYY</b> or <b>DD/MM/YYYY</b>
+    </p>
+    <div class="mbtns">
+      <button class="btn-s" id="m-cancel">Cancel</button>
+      <button class="btn-p" id="m-save">💾 Save & Reload</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────
+const SK = 'itd_period_cfg';
+const DEF = {
+  sheetId: '1d8g6KbrMxCvBMOkxJpQaUxTJcVO6aLL_4eS1IahVTQc',
+  sheetName: 'period',
+  sheetGid: '1204694744'
+};
+const loadCfg = () => { try { return { ...DEF, ...JSON.parse(localStorage.getItem(SK) || '{}') }; } catch { return { ...DEF }; } };
+const saveCfg = c => localStorage.setItem(SK, JSON.stringify(c));
+
+// ── TENURE-BASED SCHEDULE ─────────────────────────────
+// target date repeats from the project start date; each target can move ±2 months.
+const TENURE_STAFF = [
+  { name: 'Manit Nookong',           role: 'Chief',    start: [2020, 11, 4], cycleMonths: 6 },
+  { name: 'Wannayut Wannacharoen',   role: 'Chief',    start: [2021, 7, 9],  cycleMonths: 6 },
+  { name: 'Sanwisut Chokrangsee',    role: 'Chief',    start: [2025, 8, 8],  cycleMonths: 6 },
+  { name: 'Supachai Siitiwong',      role: 'Chief',    start: [2020, 11, 4], cycleMonths: 6 },
+  { name: 'Suthep Changpaly',        role: 'Chief',    start: [2023, 5, 9],  cycleMonths: 6 },
+  { name: 'Weerayut Pooncharoen',    role: 'Engineer', start: [2024, 2, 28], cycleMonths: 4 },
+  { name: 'Phuttapong Charoendee',   role: 'Engineer', start: [2024, 10, 20],cycleMonths: 4 },
+];
+
+// ── DATE UTILS (all UTC-midnight to avoid timezone drift) ──
+function utcDay(y, m, d) { return Date.UTC(y, m - 1, d); }  // m = 1-based
+
+function parseDate(v) {
+  if (v === null || v === undefined) return null;
+  const s = String(v).trim();
+  if (!s || s === 'null') return null;
+
+  let m;
+
+  // 1) gviz Date literal: Date(2026,6,3) — month is 0-BASED → add 1
+  m = s.match(/^Date\((\d+),(\d+),(\d+)\)$/);
+  if (m) {
+    const y = +m[1], mo0 = +m[2], d = +m[3];
+    return utcDay(y, mo0 + 1, d);  // mo0+1 converts to 1-based
+  }
+
+  // 2) DD-MM-YYYY (dash separator, Thai convention — always try this first)
+  m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (m) {
+    const dd = +m[1], mm = +m[2], yy = +m[3];
+    if (dd >= 1 && dd <= 31 && mm >= 1 && mm <= 12 && yy > 2000)
+      return utcDay(yy, mm, dd);
+  }
+
+  // 3) YYYY-MM-DD (ISO)
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return utcDay(+m[1], +m[2], +m[3]);
+
+  // 4) DD/MM/YYYY (slash, Thai convention — day first)
+  //    Only use this if first number > 12 (unambiguous day)
+  //    OR second number > 12 (unambiguous month... wait that's invalid)
+  //    Safest: only trust if we can confirm it's DD/MM by day>12
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) {
+    const a = +m[1], b = +m[2], yy = +m[3];
+    // If a > 12: must be day → a=DD, b=MM
+    if (a > 12 && b >= 1 && b <= 12 && yy > 2000)
+      return utcDay(yy, b, a);
+    // If b > 12: must be day → M/D/YYYY US format
+    if (b > 12 && a >= 1 && a <= 12 && yy > 2000)
+      return utcDay(yy, a, b);
+    // Both <= 12: ambiguous — assume Thai DD/MM (day first)
+    if (a >= 1 && b >= 1 && b <= 12 && yy > 2000)
+      return utcDay(yy, b, a);
+  }
+
+  // 5) DD-MMM-YYYY / DD MMM YYYY / DD-MMMM-YYYY, e.g. 08-Aug-2026
+  m = s.match(/^(\d{1,2})[-\s]([A-Za-z]{3,9})[-\s](\d{2}|\d{4})$/);
+  if (m) {
+    const dd = +m[1];
+    const mm = MONTH_NAMES[m[2].toLowerCase()];
+    const yy = +m[3] < 100 ? 2000 + +m[3] : +m[3];
+    if (dd >= 1 && dd <= 31 && mm && yy > 2000)
+      return utcDay(yy, mm, dd);
+  }
+
+  return null;
+}
+
+function tsToDate(ts) {
+  // ts = UTC midnight ms
+  return new Date(ts);
+}
+
+function addDays(ts, n) { return ts + n * 864e5; }
+function addMonths(ts, n) {
+  const d = new Date(ts);
+  const day = d.getUTCDate();
+  const first = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, 1);
+  const f = new Date(first);
+  const lastDay = new Date(Date.UTC(f.getUTCFullYear(), f.getUTCMonth() + 1, 0)).getUTCDate();
+  return Date.UTC(f.getUTCFullYear(), f.getUTCMonth(), Math.min(day, lastDay));
+}
+function diffDays(s, e) { return Math.max(1, Math.round((e - s) / 864e5) + 1); }
+
+function fmtTH(ts) {
+  if (ts == null) return '—';
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+function fmtShort(ts) {
+  if (ts == null) return '—';
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', timeZone: 'UTC' });
+}
+
+const DAY_TH = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MON_TH = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_NAMES = {
+  jan: 1, january: 1,
+  feb: 2, february: 2,
+  mar: 3, march: 3,
+  apr: 4, april: 4,
+  may: 5,
+  jun: 6, june: 6,
+  jul: 7, july: 7,
+  aug: 8, august: 8,
+  sep: 9, sept: 9, september: 9,
+  oct: 10, october: 10,
+  nov: 11, november: 11,
+  dec: 12, december: 12,
+};
+
+// TODAY as UTC midnight
+const _now = new Date();
+const TODAY = Date.UTC(_now.getFullYear(), _now.getMonth(), _now.getDate());
+
+// ── COLORS ────────────────────────────────────────────
+const PERIOD_COLORS = [
+  { fg: '#F97316', bg: 'rgba(249,115,22,.28)' },
+  { fg: '#3B82F6', bg: 'rgba(59,130,246,.28)' },
+  { fg: '#22C55E', bg: 'rgba(34,197,94,.28)'  },
+  { fg: '#A855F7', bg: 'rgba(168,85,247,.28)' },
+  { fg: '#EAB308', bg: 'rgba(234,179,8,.28)'  },
+  { fg: '#EC4899', bg: 'rgba(236,72,153,.28)' },
+  { fg: '#14B8A6', bg: 'rgba(20,184,166,.28)' },
+];
+const AVC = ['#F97316','#3B82F6','#22C55E','#A855F7','#EAB308','#EC4899','#14B8A6','#F43F5E'];
+
+// ── FETCH ─────────────────────────────────────────────
+async function fetchSheetCsv(sheetId, sheetName, sheetGid) {
+  // The gviz CSV endpoint can keep returning an old cell value after an edit,
+  // even with a cache-busting query parameter. The export endpoint is no-store
+  // and returns the current cell values, so prefer it whenever the tab GID is known.
+  if (sheetGid && /^\d+$/.test(String(sheetGid))) {
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${encodeURIComponent(sheetGid)}&_=${Date.now()}`;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return parseCsv(await res.text());
+  }
+
+  const sp = sheetName ? '&sheet=' + encodeURIComponent(sheetName) : '';
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&headers=0${sp}&_=${Date.now()}`;
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const txt = await res.text();
+  if (/google\.visualization\.Query\.setResponse/i.test(txt)) {
+    const json = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+    throw new Error(json.errors?.[0]?.detailed_message || 'Sheet error');
+  }
+  return parseCsv(txt);
+}
+
+function parseCsv(txt) {
+  const rows = [];
+  let row = [], cell = '', inQuote = false;
+
+  for (let i = 0; i < txt.length; i++) {
+    const ch = txt[i];
+    const nx = txt[i + 1];
+
+    if (inQuote) {
+      if (ch === '"' && nx === '"') {
+        cell += '"';
+        i++;
+      } else if (ch === '"') {
+        inQuote = false;
+      } else {
+        cell += ch;
+      }
+    } else if (ch === '"') {
+      inQuote = true;
+    } else if (ch === ',') {
+      row.push(cell.trim());
+      cell = '';
+    } else if (ch === '\n') {
+      row.push(cell.trim());
+      rows.push(row);
+      row = [];
+      cell = '';
+    } else if (ch !== '\r') {
+      cell += ch;
+    }
+  }
+
+  if (cell || row.length) {
+    row.push(cell.trim());
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+// ── PARSE ─────────────────────────────────────────────
+// Sheet "period" layout:
+//   Col A (idx 0): No.
+//   Col B (idx 1): Employee Name
+//   Col C (idx 2): Period 1 Start  (DD-MM-YYYY string)
+//   Col D (idx 3): Period 1 End
+//   Col E (idx 4): Period 2 Start  (optional)
+//   Col F (idx 5): Period 2 End    (optional)
+//   ...
+function parsePeriodRows(rows) {
+  const result = [], allLeaves = [];
+
+  console.log('[PERIOD] csv rows:', rows.length);
+
+  function cellStr(row, i) {
+    return row && row[i] != null ? String(row[i]).trim() : '';
+  }
+
+  // Words that indicate a header or non-data row in col B
+  const SKIP = /^(no\.?|employee.*|period.*|start|end|name|chief|engineers?|surveyors?)$/i;
+
+  for (let ri = 0; ri < rows.length; ri++) {
+    const row = rows[ri] || [];
+
+    // Col B = index 1 = name
+    const name = cellStr(row, 1);
+    if (!name) continue;
+    if (/^\d+$/.test(name)) continue;   // pure number → row number, skip
+    if (SKIP.test(name.trim())) continue;
+
+    const periods = [];
+    const maxPairs = Math.max(0, Math.ceil((row.length - 2) / 2));
+
+    // Scan pairs: (C,D)=idx(2,3), (E,F)=idx(4,5), ...
+    // Keep scanning all available pairs so a blank earlier period cannot hide later data.
+    for (let pIdx = 0; pIdx < maxPairs; pIdx++) {
+      const si = 2 + pIdx * 2;   // start col index
+      const ei = 3 + pIdx * 2;   // end col index
+
+      const startStr = cellStr(row, si);
+      const endStr   = cellStr(row, ei);
+
+      console.log(`[PERIOD] row${ri} "${name}" P${pIdx+1}: ` +
+        `start="${startStr}" end="${endStr}"`);
+
+      if (!startStr && !endStr) continue;
+
+      const sd = parseDate(startStr || endStr);
+      const edRaw = parseDate(endStr || startStr);
+      const ed = edRaw ?? sd;
+
+      if (sd != null) {
+        const start = Math.min(sd, ed);
+        const end = Math.max(sd, ed);
+        periods.push({
+          start, end, days: diffDays(start, end),
+          label: `Period ${pIdx + 1}`,
+          periodIdx: pIdx,
+          startFmt: fmtTH(start),
+          endFmt:   fmtTH(end),
+        });
+        console.log(`  ✓ ${fmtTH(start)} – ${fmtTH(end)} = ${diffDays(start, end)}d`);
+      } else {
+        console.log(`  ✗ could not parse date`);
+      }
+    }
+
+    result.push({ name, periods });
+    periods.forEach(p => allLeaves.push({ name, ...p }));
+    console.log(`[PERIOD] "${name}" → ${periods.length} period(s), ` +
+      `total ${periods.reduce((s,p)=>s+p.days,0)}d`);
+  }
+
+  return { persons: result, leaves: allLeaves };
+}
+
+// ── STATE ─────────────────────────────────────────────
+let persons = [], allLeaves = [], cyclePersons = [], cycleLeaves = [];
+let filteredPersons = [], filteredLeaves = [];
+let viewMode = 'leave';
+let viewStart = addDays(TODAY, -30), viewDays = 90;
+let scrollLabelRaf = 0;
+
+// ── GANTT ──────────────────────────────────────────────
+const NW = 180, CW = 30;
+
+function buildCycleData() {
+  const rangeStart = addMonths(TODAY, -8);
+  const rangeEnd = addMonths(TODAY, 18);
+  cyclePersons = TENURE_STAFF.map(staff => {
+    const joined = utcDay(...staff.start);
+    const periods = [];
+    let cycleNo = 1;
+    let target = addMonths(joined, staff.cycleMonths);
+    while (addMonths(target, 2) < rangeStart) {
+      cycleNo++;
+      target = addMonths(joined, staff.cycleMonths * cycleNo);
+    }
+    while (addMonths(target, -2) <= rangeEnd) {
+      const start = addMonths(target, -2);
+      const end = addMonths(target, 2);
+      periods.push({
+        start, end, target, days: diffDays(start, end),
+        label: `Cycle ${cycleNo}`,
+        periodIdx: staff.role === 'Chief' ? 0 : 1,
+        startFmt: fmtTH(start), endFmt: fmtTH(end), targetFmt: fmtTH(target), cycleNo,
+      });
+      cycleNo++;
+      target = addMonths(joined, staff.cycleMonths * cycleNo);
+    }
+    return { ...staff, joined, periods };
+  });
+  cycleLeaves = cyclePersons.flatMap(p => p.periods.map(period => ({ name: p.name, role: p.role, ...period })));
+}
+
+function activePersons() { return viewMode === 'cycle' ? cyclePersons : persons; }
+function activeLeaves() { return viewMode === 'cycle' ? cycleLeaves : allLeaves; }
+
+function buildGantt() {
+  const vend = addDays(viewStart, viewDays - 1);
+
+  // build array of UTC midnight timestamps for each day
+  const dates = [];
+  for (let ts = viewStart; ts <= vend; ts = addDays(ts, 1)) dates.push(ts);
+
+  const gantt = document.getElementById('gantt');
+  gantt.style.gridTemplateColumns = `${NW}px repeat(${dates.length}, ${CW}px)`;
+
+  let h = '';
+
+  // month merge row
+  h += `<div class="g-month-corner"></div>`;
+  let mi = 0;
+  while (mi < dates.length) {
+    const d = new Date(dates[mi]);
+    const m = d.getUTCMonth(), y = d.getUTCFullYear();
+    let cnt = 0;
+    while (mi + cnt < dates.length) {
+      const dd = new Date(dates[mi + cnt]);
+      if (dd.getUTCMonth() !== m) break;
+      cnt++;
+    }
+    h += `<div class="g-month-cell" style="grid-column:span ${cnt}">${MON_TH[m]} ${y + 543}</div>`;
+    mi += cnt;
+  }
+
+  // date header
+  h += `<div class="g-corner">Employees / Date</div>`;
+  dates.forEach(ts => {
+    const d = new Date(ts);
+    const dow = d.getUTCDay();
+    const we = dow === 0 || dow === 6;
+    const isT = ts === TODAY;
+    h += `<div class="g-date-cell${we ? ' we' : ''}${isT ? ' tday' : ''}">
+      <span class="d-num">${d.getUTCDate()}</span>
+      <span class="d-day">${DAY_TH[dow]}</span>
+    </div>`;
+  });
+
+  // person rows
+  filteredPersons.forEach((person, idx) => {
+    const totalD = person.periods.reduce((s, p) => s + p.days, 0);
+    const initials = (person.name.split(' ').map(w => w[0] || '').join('').slice(0, 2) || person.name[0] || '?').toUpperCase();
+    const avClr = AVC[idx % AVC.length];
+    h += `<div class="g-name-cell">
+      <div class="avatar" style="background:${avClr}">${initials}</div>
+      <span class="g-name-text">${person.name}${viewMode === 'cycle' ? `<span class="role-tag">${person.role} · every ${person.cycleMonths} months</span>` : ''}</span>
+      <span class="g-leave-count">${viewMode === 'cycle' ? person.periods.length + ' cycles' : totalD + 'd'}</span>
+    </div>`;
+    dates.forEach(ts => {
+      const d = new Date(ts);
+      const dow = d.getUTCDay();
+      const we = dow === 0 || dow === 6;
+      const isT = ts === TODAY;
+      h += `<div class="g-row-cell${we ? ' we' : ''}${isT ? ' tday' : ''}"></div>`;
+    });
+  });
+
+  // workload row
+  const wlMap = {};
+  filteredLeaves.forEach(r => {
+    for (let ts = r.start; ts <= r.end; ts = addDays(ts, 1)) {
+      wlMap[ts] = (wlMap[ts] || 0) + 1;
+    }
+  });
+  const maxWL = Math.max(1, ...dates.map(ts => wlMap[ts] || 0));
+
+  h += `<div class="g-wl-name">${viewMode === 'cycle' ? 'Planning windows/day' : '🔴 On Leave/Day'}</div>`;
+  dates.forEach(ts => {
+    const cnt = wlMap[ts] || 0;
+    const clr = viewMode === 'cycle'
+      ? (cnt === 0 ? 'transparent' : 'var(--blue)')
+      : (cnt === 0 ? 'transparent' : cnt === 1 ? 'var(--green)' : cnt <= 2 ? 'var(--yellow)' : 'var(--red)');
+    const bh = Math.max(cnt > 0 ? 5 : 0, (cnt / maxWL) * 28);
+    h += `<div class="g-wl-cell">
+      <div class="wl-bar" style="background:${clr};height:${bh}px">
+        ${cnt > 0 && bh > 11 ? `<span class="wl-num">${cnt}</span>` : ''}
+      </div>
+    </div>`;
+  });
+
+  gantt.innerHTML = h;
+
+  // ── overlay leave bars ──
+  requestAnimationFrame(() => {
+    renderPeriodLabel();
+
+    const allCells = gantt.querySelectorAll('.g-row-cell');
+    const perPerson = dates.length;
+
+    filteredPersons.forEach((person, pi) => {
+      person.periods.forEach(r => {
+        // clamp to view window
+        const bs = Math.max(r.start, viewStart);
+        const be = Math.min(r.end,   vend);
+        if (bs > vend || be < viewStart) return;
+
+        const si = Math.round((bs - viewStart) / 864e5);
+        const ei = Math.round((be - viewStart) / 864e5);
+        const cell = allCells[pi * perPerson + si];
+        if (!cell) return;
+
+        const span = ei - si + 1;
+        const { fg, bg } = PERIOD_COLORS[r.periodIdx % PERIOD_COLORS.length];
+        const bar = document.createElement('div');
+        bar.className = 'leave-bar' + (viewMode === 'cycle' ? ' cycle-bar' : '');
+        bar.style.cssText = viewMode === 'cycle'
+          ? `width:calc(${span * CW}px - 4px);`
+          : `background:${bg};color:${fg};border:1px solid ${fg};width:calc(${span * CW}px - 4px);`;
+        bar.textContent = span > 3 ? r.label : span > 1 ? 'P' + (r.periodIdx + 1) : '';
+        if (viewMode === 'cycle') {
+          const targetPct = Math.max(0, Math.min(100, ((r.target - bs) / Math.max(1, be - bs)) * 100));
+          const marker = document.createElement('span');
+          marker.className = 'cycle-target';
+          marker.style.left = `calc(${targetPct}% - 1px)`;
+          bar.appendChild(marker);
+        }
+
+        bar.addEventListener('mouseenter', e => {
+          document.getElementById('tt-name').textContent = person.name;
+          document.getElementById('tt-dates').textContent = viewMode === 'cycle'
+            ? `Target: ${r.targetFmt}`
+            : `📅 ${r.startFmt} – ${r.endFmt}`;
+          document.getElementById('tt-days').textContent = viewMode === 'cycle'
+            ? `Flexible window: ${r.startFmt} – ${r.endFmt}`
+            : `⏱ ${r.days} day(s)`;
+          document.getElementById('tt-type').innerHTML =
+            `<span class="tt-badge" style="background:${bg};color:${fg}">${r.label}</span>`;
+          document.getElementById('tooltip').classList.add('show');
+          moveTT(e);
+        });
+        bar.addEventListener('mousemove', moveTT);
+        bar.addEventListener('mouseleave', () => document.getElementById('tooltip').classList.remove('show'));
+        cell.appendChild(bar);
+      });
+    });
+  });
+}
+
+function scrollToDate(ts, behavior = 'smooth') {
+  const wrap = document.getElementById('gantt-wrap');
+  const idx = Math.max(0, Math.min(viewDays - 1, Math.round((ts - viewStart) / 864e5)));
+  const centeredLeft = idx * CW - Math.max(0, (wrap.clientWidth - NW - CW) / 2);
+  wrap.scrollTo({ left: Math.max(0, centeredLeft), behavior });
+  requestAnimationFrame(renderPeriodLabel);
+}
+
+function setTimelineRange() {
+  const data = activeLeaves();
+  const starts = data.map(r => r.start).filter(Number.isFinite);
+  const ends = data.map(r => r.end).filter(Number.isFinite);
+  const minDate = starts.length ? Math.min(TODAY, ...starts) : TODAY;
+  const maxDate = ends.length ? Math.max(TODAY, ...ends) : TODAY;
+
+  viewStart = addDays(minDate, -30);
+  viewDays = diffDays(viewStart, addDays(maxDate, 30));
+}
+
+function moveTT(e) {
+  const tt = document.getElementById('tooltip');
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + 250 > window.innerWidth) x = e.clientX - 250;
+  if (y + 120 > window.innerHeight) y = e.clientY - 120;
+  tt.style.left = x + 'px'; tt.style.top = y + 'px';
+}
+
+// ── SUMMARY + LEGEND ──────────────────────────────────
+function renderSummary() {
+  if (viewMode === 'cycle') {
+    const inWindow = filteredPersons.filter(p => p.periods.some(r => r.start <= TODAY && r.end >= TODAY));
+    const chiefs = filteredPersons.filter(p => p.role === 'Chief').length;
+    const engineers = filteredPersons.filter(p => p.role === 'Engineer').length;
+    document.getElementById('sum-strip').innerHTML = `
+      <div class="scard"><div class="scard-dot" style="background:var(--orange)"></div><span class="scard-val" style="color:var(--orange)">${chiefs}</span><span class="scard-lbl">Chiefs · 6-month cycle</span></div>
+      <div class="scard"><div class="scard-dot" style="background:var(--blue)"></div><span class="scard-val" style="color:var(--blue)">${engineers}</span><span class="scard-lbl">Engineers · 4-month cycle</span></div>
+      <div class="scard"><div class="scard-dot" style="background:var(--green)"></div><span class="scard-val" style="color:var(--green)">${inWindow.length}</span><span class="scard-lbl">Within flexible window today</span></div>`;
+    document.getElementById('legend').innerHTML = `
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(59,130,246,.45);border:1px solid #60A5FA"></div>Flexible window ±2 months</div>
+      <div class="leg-item"><div class="leg-dot" style="width:2px;background:#fff"></div>Target date</div>`;
+    return;
+  }
+  const onLeave = filteredPersons.filter(p =>
+    p.periods.some(r => r.start <= TODAY && r.end >= TODAY)
+  );
+  const totalDays = filteredLeaves.reduce((s, r) => s + r.days, 0);
+  const maxPeriods = filteredPersons.reduce((mx, p) => Math.max(mx, p.periods.length), 0);
+
+  document.getElementById('sum-strip').innerHTML = `
+    <div class="scard"><div class="scard-dot" style="background:var(--orange)"></div>
+      <span class="scard-val" style="color:var(--orange)">${filteredPersons.length}</span>
+      <span class="scard-lbl">Employees</span></div>
+    <div class="scard"><div class="scard-dot" style="background:var(--blue)"></div>
+      <span class="scard-val" style="color:var(--blue)">${filteredLeaves.length}</span>
+      <span class="scard-lbl">Leave Records</span></div>
+    <div class="scard"><div class="scard-dot" style="background:var(--green)"></div>
+      <span class="scard-val" style="color:var(--green)">${totalDays}</span>
+      <span class="scard-lbl">Total Days</span></div>
+    <div class="scard"><div class="scard-dot" style="background:var(--red)"></div>
+      <span class="scard-val" style="color:var(--red)">${onLeave.length}</span>
+      <span class="scard-lbl">LeaveToday</span></div>`;
+
+  const legendItems = [];
+  for (let i = 0; i < Math.min(maxPeriods, PERIOD_COLORS.length); i++) {
+    legendItems.push(`<div class="leg-item"><div class="leg-dot" style="background:${PERIOD_COLORS[i].fg}"></div>Period ${i+1}</div>`);
+  }
+  legendItems.push(`
+    <div class="leg-item" style="margin-left:auto"><div class="leg-dot" style="background:var(--green)"></div>1 on leave</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--yellow)"></div>2 people</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>3+ people</div>`);
+  document.getElementById('legend').innerHTML = legendItems.join('');
+}
+
+function renderPeriodLabel() {
+  const wrap = document.getElementById('gantt-wrap');
+  const visibleCols = Math.max(1, Math.floor((wrap.clientWidth - NW) / CW));
+  const startIdx = Math.max(0, Math.min(viewDays - 1, Math.floor(wrap.scrollLeft / CW)));
+  const endIdx = Math.max(startIdx, Math.min(viewDays - 1, startIdx + visibleCols - 1));
+  const vstart = addDays(viewStart, startIdx);
+  const vend = addDays(viewStart, endIdx);
+  document.getElementById('period-lbl').textContent =
+    `${fmtShort(vstart)} – ${fmtShort(vend)} ${new Date(vstart).getUTCFullYear()}`;
+}
+
+function applyFilter() {
+  const q = document.getElementById('search-inp').value.toLowerCase();
+  filteredPersons = activePersons().filter(p => !q || p.name.toLowerCase().includes(q));
+  filteredLeaves  = activeLeaves().filter(r => !q || r.name.toLowerCase().includes(q));
+  renderSummary(); buildGantt();
+}
+
+function setViewMode(mode) {
+  viewMode = mode;
+  document.getElementById('view-leave').classList.toggle('active', mode === 'leave');
+  document.getElementById('view-cycle').classList.toggle('active', mode === 'cycle');
+  setTimelineRange();
+  applyFilter();
+  requestAnimationFrame(() => scrollToDate(TODAY, 'auto'));
+}
+
+// ── LOAD ─────────────────────────────────────────────
+async function loadData() {
+  const btn = document.getElementById('ref-btn');
+  btn.classList.add('spin');
+  document.getElementById('err-area').innerHTML = '';
+  const cfg = loadCfg();
+  try {
+    const rows = await fetchSheetCsv(cfg.sheetId, cfg.sheetName || 'period', cfg.sheetGid);
+    const parsed = parsePeriodRows(rows);
+    persons   = parsed.persons;
+    allLeaves = parsed.leaves;
+    buildCycleData();
+
+    filteredPersons = [...activePersons()];
+    filteredLeaves  = [...activeLeaves()];
+
+    setTimelineRange();
+
+    renderSummary(); buildGantt();
+    requestAnimationFrame(() => scrollToDate(TODAY, 'auto'));
+    document.getElementById('lupd').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB');
+  } catch (err) {
+    let msg = err.message || 'Failed to load';
+    let hint = '';
+    if (/401|403|PERMISSION/i.test(msg)) hint = '<br/>⚠️ Make sure the Sheet is shared as <b>Anyone with the link → Viewer</b>';
+    else if (/404|not found/i.test(msg)) hint = '<br/>⚠️ Sheet not found. Please check the Spreadsheet ID';
+    document.getElementById('err-area').innerHTML =
+      `<div class="err">❌ ${msg}${hint}<br/><br/>💡 Click ⚙️ to configure Sheet ID and Tab name</div>`;
+    persons = []; allLeaves = [];
+    filteredPersons = [...activePersons()];
+    filteredLeaves = [...activeLeaves()];
+    setTimelineRange();
+    renderSummary(); buildGantt();
+  } finally {
+    btn.classList.remove('spin');
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+
+// ── EVENTS ────────────────────────────────────────────
+document.getElementById('today-btn').addEventListener('click', () => {
+  scrollToDate(TODAY);
+});
+document.getElementById('gantt-wrap').addEventListener('scroll', () => {
+  if (scrollLabelRaf) return;
+  scrollLabelRaf = requestAnimationFrame(() => {
+    scrollLabelRaf = 0;
+    renderPeriodLabel();
+  });
+});
+document.getElementById('ref-btn').addEventListener('click', loadData);
+document.getElementById('search-inp').addEventListener('input', applyFilter);
+document.getElementById('view-leave').addEventListener('click', () => setViewMode('leave'));
+document.getElementById('view-cycle').addEventListener('click', () => setViewMode('cycle'));
+
+document.getElementById('cfg-btn').addEventListener('click', () => {
+  const c = loadCfg();
+  document.getElementById('c-id').value  = c.sheetId    || '';
+  document.getElementById('c-tab').value = c.sheetName  || 'period';
+  document.getElementById('c-gid').value = c.sheetGid   || '';
+  document.getElementById('modal-bg').classList.add('open');
+});
+document.getElementById('m-cancel').addEventListener('click', () =>
+  document.getElementById('modal-bg').classList.remove('open'));
+document.getElementById('m-save').addEventListener('click', () => {
+  saveCfg({
+    sheetId:   document.getElementById('c-id').value.trim(),
+    sheetName: document.getElementById('c-tab').value.trim() || 'period',
+    sheetGid:  document.getElementById('c-gid').value.trim(),
+  });
+  document.getElementById('modal-bg').classList.remove('open');
+  document.getElementById('loading').style.display = 'flex';
+  loadData();
+});
+
+// ── INIT ──────────────────────────────────────────────
+buildCycleData();
+renderPeriodLabel();
+loadData();
+</script>
+</body>
+</html>
