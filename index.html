@@ -110,6 +110,7 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
 .leave-bar:hover{filter:brightness(1.2);z-index:10;}
 .cycle-bar{background:rgba(59,130,246,.16);color:#93C5FD;border:1px solid rgba(59,130,246,.75);overflow:visible;}
 .cycle-target{position:absolute;top:-5px;bottom:-5px;width:2px;background:#fff;border-radius:2px;box-shadow:0 0 0 2px rgba(59,130,246,.45);}
+.leave-entitlement{position:absolute;top:3px;bottom:3px;background:#3B82F6;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;overflow:hidden;z-index:1;}
 .role-tag{font-size:9px;color:var(--muted);display:block;font-weight:400;line-height:1.15;}
 
 /* workload row */
@@ -240,15 +241,15 @@ const loadCfg = () => { try { return { ...DEF, ...JSON.parse(localStorage.getIte
 const saveCfg = c => localStorage.setItem(SK, JSON.stringify(c));
 
 // ── TENURE-BASED SCHEDULE ─────────────────────────────
-// target date repeats from the project start date; each target can move ±2 months.
+// After each service cycle, the employee earns a leave block. Its start can move ±2 months.
 const TENURE_STAFF = [
-  { name: 'Manit Nookong',           role: 'Chief',    start: [2020, 11, 4], cycleMonths: 6 },
-  { name: 'Wannayut Wannacharoen',   role: 'Chief',    start: [2021, 7, 9],  cycleMonths: 6 },
-  { name: 'Sanwisut Chokrangsee',    role: 'Chief',    start: [2025, 8, 8],  cycleMonths: 6 },
-  { name: 'Supachai Siitiwong',      role: 'Chief',    start: [2020, 11, 4], cycleMonths: 6 },
-  { name: 'Suthep Changpaly',        role: 'Chief',    start: [2023, 5, 9],  cycleMonths: 6 },
-  { name: 'Weerayut Pooncharoen',    role: 'Engineer', start: [2024, 2, 28], cycleMonths: 4 },
-  { name: 'Phuttapong Charoendee',   role: 'Engineer', start: [2024, 10, 20],cycleMonths: 4 },
+  { name: 'Manit Nookong',           role: 'Chief',    start: [2020, 11, 4], cycleMonths: 6, leaveDays: 18 },
+  { name: 'Wannayut Wannacharoen',   role: 'Chief',    start: [2021, 7, 9],  cycleMonths: 6, leaveDays: 18 },
+  { name: 'Sanwisut Chokrangsee',    role: 'Chief',    start: [2025, 8, 8],  cycleMonths: 6, leaveDays: 18 },
+  { name: 'Supachai Siitiwong',      role: 'Chief',    start: [2020, 11, 4], cycleMonths: 6, leaveDays: 18 },
+  { name: 'Suthep Changpaly',        role: 'Chief',    start: [2023, 5, 9],  cycleMonths: 6, leaveDays: 18 },
+  { name: 'Weerayut Pooncharoen',    role: 'Engineer', start: [2024, 2, 28], cycleMonths: 4, leaveDays: 12 },
+  { name: 'Phuttapong Charoendee',   role: 'Engineer', start: [2024, 10, 20],cycleMonths: 4, leaveDays: 12 },
 ];
 
 // ── DATE UTILS (all UTC-midnight to avoid timezone drift) ──
@@ -536,11 +537,12 @@ function buildCycleData() {
     while (addMonths(target, -2) <= rangeEnd) {
       const start = addMonths(target, -2);
       const end = addMonths(target, 2);
+      const leaveEnd = addDays(target, staff.leaveDays - 1);
       periods.push({
-        start, end, target, days: diffDays(start, end),
+        start, end, target, leaveEnd, days: staff.leaveDays, leaveDays: staff.leaveDays,
         label: `Cycle ${cycleNo}`,
         periodIdx: staff.role === 'Chief' ? 0 : 1,
-        startFmt: fmtTH(start), endFmt: fmtTH(end), targetFmt: fmtTH(target), cycleNo,
+        startFmt: fmtTH(start), endFmt: fmtTH(end), targetFmt: fmtTH(target), leaveEndFmt: fmtTH(leaveEnd), cycleNo,
       });
       cycleNo++;
       target = addMonths(joined, staff.cycleMonths * cycleNo);
@@ -601,7 +603,7 @@ function buildGantt() {
     const avClr = AVC[idx % AVC.length];
     h += `<div class="g-name-cell">
       <div class="avatar" style="background:${avClr}">${initials}</div>
-      <span class="g-name-text">${person.name}${viewMode === 'cycle' ? `<span class="role-tag">${person.role} · every ${person.cycleMonths} months</span>` : ''}</span>
+      <span class="g-name-text">${person.name}${viewMode === 'cycle' ? `<span class="role-tag">${person.role} · ${person.leaveDays} days / ${person.cycleMonths} months</span>` : ''}</span>
       <span class="g-leave-count">${viewMode === 'cycle' ? person.periods.length + ' cycles' : totalD + 'd'}</span>
     </div>`;
     dates.forEach(ts => {
@@ -667,6 +669,17 @@ function buildGantt() {
         bar.textContent = span > 3 ? r.label : span > 1 ? 'P' + (r.periodIdx + 1) : '';
         if (viewMode === 'cycle') {
           const targetPct = Math.max(0, Math.min(100, ((r.target - bs) / Math.max(1, be - bs)) * 100));
+          const entitlementEnd = Math.min(r.leaveEnd, be);
+          if (r.target <= be && entitlementEnd >= bs) {
+            const leaveLeftPct = Math.max(0, ((Math.max(r.target, bs) - bs) / Math.max(1, be - bs)) * 100);
+            const leaveWidthPct = Math.max(1.5, ((entitlementEnd - Math.max(r.target, bs) + 864e5) / Math.max(864e5, be - bs + 864e5)) * 100);
+            const entitlement = document.createElement('span');
+            entitlement.className = 'leave-entitlement';
+            entitlement.style.left = `${leaveLeftPct}%`;
+            entitlement.style.width = `${leaveWidthPct}%`;
+            entitlement.textContent = `${r.leaveDays}d`;
+            bar.appendChild(entitlement);
+          }
           const marker = document.createElement('span');
           marker.className = 'cycle-target';
           marker.style.left = `calc(${targetPct}% - 1px)`;
@@ -679,10 +692,10 @@ function buildGantt() {
             ? `Target: ${r.targetFmt}`
             : `📅 ${r.startFmt} – ${r.endFmt}`;
           document.getElementById('tt-days').textContent = viewMode === 'cycle'
-            ? `Flexible window: ${r.startFmt} – ${r.endFmt}`
+            ? `${r.leaveDays} leave days: ${r.targetFmt} – ${r.leaveEndFmt}`
             : `⏱ ${r.days} day(s)`;
           document.getElementById('tt-type').innerHTML =
-            `<span class="tt-badge" style="background:${bg};color:${fg}">${r.label}</span>`;
+            `<span class="tt-badge" style="background:${bg};color:${fg}">${r.label}${viewMode === 'cycle' ? ` · movable ${r.startFmt} – ${r.endFmt}` : ''}</span>`;
           document.getElementById('tooltip').classList.add('show');
           moveTT(e);
         });
@@ -728,12 +741,13 @@ function renderSummary() {
     const chiefs = filteredPersons.filter(p => p.role === 'Chief').length;
     const engineers = filteredPersons.filter(p => p.role === 'Engineer').length;
     document.getElementById('sum-strip').innerHTML = `
-      <div class="scard"><div class="scard-dot" style="background:var(--orange)"></div><span class="scard-val" style="color:var(--orange)">${chiefs}</span><span class="scard-lbl">Chiefs · 6-month cycle</span></div>
-      <div class="scard"><div class="scard-dot" style="background:var(--blue)"></div><span class="scard-val" style="color:var(--blue)">${engineers}</span><span class="scard-lbl">Engineers · 4-month cycle</span></div>
+      <div class="scard"><div class="scard-dot" style="background:var(--orange)"></div><span class="scard-val" style="color:var(--orange)">${chiefs}</span><span class="scard-lbl">Chiefs · 18 days after 6 months</span></div>
+      <div class="scard"><div class="scard-dot" style="background:var(--blue)"></div><span class="scard-val" style="color:var(--blue)">${engineers}</span><span class="scard-lbl">Engineers · 12 days after 4 months</span></div>
       <div class="scard"><div class="scard-dot" style="background:var(--green)"></div><span class="scard-val" style="color:var(--green)">${inWindow.length}</span><span class="scard-lbl">Within flexible window today</span></div>`;
     document.getElementById('legend').innerHTML = `
-      <div class="leg-item"><div class="leg-dot" style="background:rgba(59,130,246,.45);border:1px solid #60A5FA"></div>Flexible window ±2 months</div>
-      <div class="leg-item"><div class="leg-dot" style="width:2px;background:#fff"></div>Target date</div>`;
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(59,130,246,.25);border:1px solid #60A5FA"></div>Movable start window ±2 months</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#3B82F6"></div>Leave entitlement 18/12 days</div>
+      <div class="leg-item"><div class="leg-dot" style="width:2px;background:#fff"></div>Due date</div>`;
     return;
   }
   const onLeave = filteredPersons.filter(p =>
