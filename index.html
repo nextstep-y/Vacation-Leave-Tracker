@@ -112,6 +112,11 @@ header{background:var(--bg2);border-bottom:1px solid var(--border);height:60px;p
 .cycle-target{position:absolute;top:-5px;bottom:-5px;width:2px;background:#fff;border-radius:2px;box-shadow:0 0 0 2px rgba(59,130,246,.45);}
 .leave-entitlement{position:absolute;top:3px;bottom:3px;background:#3B82F6;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;overflow:hidden;z-index:1;}
 .role-tag{font-size:9px;color:var(--muted);display:block;font-weight:400;line-height:1.15;}
+.month-window{background:rgba(59,130,246,.10);}
+.month-due-card{position:absolute;inset:5px 4px;background:#2563EB;border:1px solid #60A5FA;border-radius:6px;color:#fff;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 5px;font-size:10px;font-weight:700;white-space:nowrap;cursor:default;z-index:5;box-shadow:0 2px 6px rgba(0,0,0,.35);}
+.month-due-card small{font-size:8px;font-weight:500;opacity:.8;}
+.g-month-only{height:46px;font-size:11px;font-weight:600;color:var(--muted);background:var(--bg3);border-right:1px solid var(--border);border-bottom:2px solid rgba(249,115,22,.3);display:flex;align-items:center;justify-content:center;text-transform:uppercase;}
+.g-month-only.tday{background:var(--orange-glow);color:var(--orange);}
 
 /* workload row */
 .g-wl-name{position:sticky;left:0;z-index:20;background:var(--bg4);border-right:1px solid var(--border);border-top:2px solid var(--border);padding:0 14px;height:36px;display:flex;align-items:center;font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
@@ -520,7 +525,7 @@ let viewStart = addDays(TODAY, -30), viewDays = 90;
 let scrollLabelRaf = 0;
 
 // ── GANTT ──────────────────────────────────────────────
-const NW = 180, CW = 30;
+const NW = 180, CW = 30, MCW = 100;
 
 function buildCycleData() {
   const rangeStart = addMonths(TODAY, -8);
@@ -555,7 +560,98 @@ function buildCycleData() {
 function activePersons() { return viewMode === 'cycle' ? cyclePersons : persons; }
 function activeLeaves() { return viewMode === 'cycle' ? cycleLeaves : allLeaves; }
 
+function monthStart(ts) {
+  const d = new Date(ts);
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+}
+
+function monthKey(ts) {
+  const d = new Date(ts);
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+function getCycleMonths() {
+  const starts = cycleLeaves.map(r => monthStart(r.start));
+  const ends = cycleLeaves.map(r => monthStart(r.end));
+  const first = starts.length ? Math.min(...starts) : monthStart(addMonths(TODAY, -8));
+  const last = ends.length ? Math.max(...ends) : monthStart(addMonths(TODAY, 18));
+  const months = [];
+  for (let ts = first; ts <= last; ts = addMonths(ts, 1)) months.push(ts);
+  return months;
+}
+
+function buildCycleMonthlyGantt() {
+  const months = getCycleMonths();
+  const gantt = document.getElementById('gantt');
+  gantt.style.gridTemplateColumns = `${NW}px repeat(${months.length}, ${MCW}px)`;
+  let h = '<div class="g-month-corner"></div>';
+
+  let yi = 0;
+  while (yi < months.length) {
+    const year = new Date(months[yi]).getUTCFullYear();
+    let count = 0;
+    while (yi + count < months.length && new Date(months[yi + count]).getUTCFullYear() === year) count++;
+    h += `<div class="g-month-cell" style="grid-column:span ${count}">${year + 543}</div>`;
+    yi += count;
+  }
+
+  h += '<div class="g-corner">Employees / Month</div>';
+  months.forEach(ts => {
+    const d = new Date(ts);
+    const current = d.getUTCFullYear() === new Date(TODAY).getUTCFullYear() && d.getUTCMonth() === new Date(TODAY).getUTCMonth();
+    h += `<div class="g-month-only${current ? ' tday' : ''}">${MON_TH[d.getUTCMonth()]}</div>`;
+  });
+
+  filteredPersons.forEach((person, idx) => {
+    const initials = (person.name.split(' ').map(w => w[0] || '').join('').slice(0, 2) || '?').toUpperCase();
+    h += `<div class="g-name-cell"><div class="avatar" style="background:${AVC[idx % AVC.length]}">${initials}</div>
+      <span class="g-name-text">${person.name}<span class="role-tag">${person.role} · ${person.leaveDays} days / ${person.cycleMonths} months</span></span>
+      <span class="g-leave-count">${person.periods.length} cycles</span></div>`;
+    months.forEach(month => {
+      const nextMonth = addMonths(month, 1) - 1;
+      const inWindow = person.periods.some(r => r.start <= nextMonth && r.end >= month);
+      h += `<div class="g-row-cell${inWindow ? ' month-window' : ''}" data-month="${monthKey(month)}"></div>`;
+    });
+  });
+
+  const dueCounts = Object.fromEntries(months.map(m => [monthKey(m), 0]));
+  filteredLeaves.forEach(r => { const k = monthKey(r.target); if (k in dueCounts) dueCounts[k]++; });
+  const maxDue = Math.max(1, ...Object.values(dueCounts));
+  h += '<div class="g-wl-name">Due cycles/month</div>';
+  months.forEach(month => {
+    const count = dueCounts[monthKey(month)] || 0;
+    const height = count ? Math.max(8, count / maxDue * 28) : 0;
+    h += `<div class="g-wl-cell"><div class="wl-bar" style="height:${height}px;background:${count ? 'var(--blue)' : 'transparent'}">${count ? `<span class="wl-num">${count}</span>` : ''}</div></div>`;
+  });
+  gantt.innerHTML = h;
+
+  requestAnimationFrame(() => {
+    const cells = gantt.querySelectorAll('.g-row-cell');
+    filteredPersons.forEach((person, pi) => person.periods.forEach(r => {
+      const mi = months.findIndex(m => monthKey(m) === monthKey(r.target));
+      if (mi < 0) return;
+      const cell = cells[pi * months.length + mi];
+      if (!cell) return;
+      const card = document.createElement('div');
+      card.className = 'month-due-card';
+      card.innerHTML = `${r.leaveDays}d <small>C${r.cycleNo}</small>`;
+      card.addEventListener('mouseenter', e => {
+        document.getElementById('tt-name').textContent = person.name;
+        document.getElementById('tt-dates').textContent = `Due: ${r.targetFmt}`;
+        document.getElementById('tt-days').textContent = `${r.leaveDays} leave days · movable ${r.startFmt} – ${r.endFmt}`;
+        document.getElementById('tt-type').innerHTML = `<span class="tt-badge" style="background:rgba(59,130,246,.28);color:#60A5FA">Cycle ${r.cycleNo}</span>`;
+        document.getElementById('tooltip').classList.add('show'); moveTT(e);
+      });
+      card.addEventListener('mousemove', moveTT);
+      card.addEventListener('mouseleave', () => document.getElementById('tooltip').classList.remove('show'));
+      cell.appendChild(card);
+    }));
+    renderPeriodLabel();
+  });
+}
+
 function buildGantt() {
+  if (viewMode === 'cycle') { buildCycleMonthlyGantt(); return; }
   const vend = addDays(viewStart, viewDays - 1);
 
   // build array of UTC midnight timestamps for each day
@@ -709,6 +805,15 @@ function buildGantt() {
 
 function scrollToDate(ts, behavior = 'smooth') {
   const wrap = document.getElementById('gantt-wrap');
+  if (viewMode === 'cycle') {
+    const months = getCycleMonths();
+    const key = monthKey(ts);
+    const idx = Math.max(0, months.findIndex(m => monthKey(m) === key));
+    const centeredLeft = idx * MCW - Math.max(0, (wrap.clientWidth - NW - MCW) / 2);
+    wrap.scrollTo({ left: Math.max(0, centeredLeft), behavior });
+    requestAnimationFrame(renderPeriodLabel);
+    return;
+  }
   const idx = Math.max(0, Math.min(viewDays - 1, Math.round((ts - viewStart) / 864e5)));
   const centeredLeft = idx * CW - Math.max(0, (wrap.clientWidth - NW - CW) / 2);
   wrap.scrollTo({ left: Math.max(0, centeredLeft), behavior });
@@ -783,6 +888,15 @@ function renderSummary() {
 
 function renderPeriodLabel() {
   const wrap = document.getElementById('gantt-wrap');
+  if (viewMode === 'cycle') {
+    const months = getCycleMonths();
+    const visibleCols = Math.max(1, Math.floor((wrap.clientWidth - NW) / MCW));
+    const startIdx = Math.max(0, Math.min(months.length - 1, Math.floor(wrap.scrollLeft / MCW)));
+    const endIdx = Math.min(months.length - 1, startIdx + visibleCols - 1);
+    const start = new Date(months[startIdx]), end = new Date(months[endIdx]);
+    document.getElementById('period-lbl').textContent = `${MON_TH[start.getUTCMonth()]} ${start.getUTCFullYear()} – ${MON_TH[end.getUTCMonth()]} ${end.getUTCFullYear()}`;
+    return;
+  }
   const visibleCols = Math.max(1, Math.floor((wrap.clientWidth - NW) / CW));
   const startIdx = Math.max(0, Math.min(viewDays - 1, Math.floor(wrap.scrollLeft / CW)));
   const endIdx = Math.max(startIdx, Math.min(viewDays - 1, startIdx + visibleCols - 1));
